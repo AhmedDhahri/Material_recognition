@@ -1,0 +1,15 @@
+brick
+Ceramic
+Fabric
+Glass
+Leather
+Metal
+Mirror
+Other
+Painted
+Paper
+Plastic
+Stone
+Tile
+Wood
+Nothing

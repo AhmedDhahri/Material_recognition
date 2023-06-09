@@ -1,0 +1,3 @@
+densefuse: 1:1  64
+vae      : 1:4  256
+opticFlow: 1:4  224
