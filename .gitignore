@@ -1,6 +1,10 @@
 minc-model.tar.gz
-datasets/
+datasets/*
+!datasets/.gitkeep
+weights/*
+!weights/.gitkeep
+logs/*
+!logs/.gitkeep
 models/davit
 utils/VGG16/GrayVGG16_FC_BN_epoch120_batchsize32.pth
-weights/
-logs/
+!utils/VGG16/.gitkeep
