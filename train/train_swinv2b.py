@@ -8,7 +8,6 @@ import time
 from tqdm import tqdm
 from torchsummary import summary
 from torch.utils.data import DataLoader
-from torch.utils.tensorboard import SummaryWriter
 
 from dataloaders.minc_dataloader import MINCDataset, MINCDataLoader
 from utils import CosineDecayLR, Metrics
