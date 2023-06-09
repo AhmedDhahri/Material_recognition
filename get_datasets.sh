@@ -36,6 +36,6 @@ else
 	wget https://github.com/AhmedDhahri/Material_recognition/releases/download/datasets/Irh_dataset.zip
 	mkdir ../datasets/irh
 	mkdir ../datasets/irh/files
-	unzip Irh_dataset.zip -d datasets/irh/files
+	unzip Irh_dataset.zip -d ../datasets/irh/files
 fi
 
