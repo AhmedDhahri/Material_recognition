@@ -1,4 +1,9 @@
-mkdir downloads
+if test -d "downloads"; then
+	echo "downloads exist."
+else
+	mkdir downloads
+fi
+
 cd downloads
 
 if test -f "minc-model.tar.gz"; then
