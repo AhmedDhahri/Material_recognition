@@ -1,13 +1,13 @@
 import torch
 import math
 from ssim import SSIM
-from vgg_layers import Perceptual_Loss
+#from vgg_layers import Perceptual_Loss
 import torchvision.models as models
 from torchvision.transforms.functional import rgb_to_grayscale
 
 class Combined_Loss_VAE:
     def __init__(self):
-        self.vgg_loss = Perceptual_Loss()
+ #       self.vgg_loss = Perceptual_Loss()
         self.ssim = SSIM()
 
     def compute(self, Ir, Iv, mu, sigma, If):
@@ -36,7 +36,7 @@ class Combined_Loss_VAE:
 
 class Combined_Loss:
     def __init__(self):
-        self.vgg_loss = Perceptual_Loss()
+#        self.vgg_loss = Perceptual_Loss()
         self.ssim = SSIM()
 
 
