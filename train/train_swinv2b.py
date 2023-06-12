@@ -33,7 +33,7 @@ EPOCHS = 30
 
 
 
-log_file = open(log_file_path, w+)
+log_file = open(log_file_path, "w+")
 train_loader = MINCDataLoader(minc_path, labels_path, batch_size=BATCH_SIZE, size=size, f=0.16)
 test_loader = DataLoader(dataset=MINCDataset(minc_path, labels_path_t, size=(size, size)), 
                          batch_size=BATCH_SIZE, num_workers=0, pin_memory=False, shuffle=True)
