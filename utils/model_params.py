@@ -27,8 +27,8 @@ class model_params:
         
         if load:
             self.model.load_state_dict(torch.load(checkpoint), strict=False)
-        self.model = model.train()
-        self.model = model.cuda()
+        self.model = self.model.train()
+        self.model = self.model.cuda()
 
     def get(self):
         return self.model, self.checkpoint, self.log_file
