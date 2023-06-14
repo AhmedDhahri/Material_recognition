@@ -4,7 +4,6 @@ import torch.nn as nn
 from torchvision.models import swin_v2_b, Swin_V2_B_Weights
 from torchvision.models import vit_h_14, ViT_H_14_Weights
 
-model_dict = {"swinv2b", "vith14", "eva02l14", "maxvitxl"}
 
 class model_params:
     def __init__(self, model_name='swinv2b'):
