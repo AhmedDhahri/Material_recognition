@@ -19,7 +19,7 @@ log_file_path = 'Material_recognition/logs/swinv2b.log'
 minc_path = 'Material_recognition/datasets/minc'
 labels_path = 'Material_recognition/datasets/minc/train.txt'
 labels_path_t = 'Material_recognition/datasets/minc/test.txt'
-checkpoint = "Material_recognition/weights/swin_v2b_minc.pth"
+checkpoint = 'Material_recognition/weights/swin_v2b_minc.pth'
 
 BATCH_SIZE = 8
 TRAIN_ITER = 2000
@@ -80,7 +80,7 @@ for epc in range(0, EPOCHS):
                 ac = ac/TEST_ITER
                 log = "Iteration:", idx,
                     "\nTest N", str(epc) + '-' + str(idx//TRAIN_ITER) + ' : ' + str(float(ac)),
-                     "\nLearning rate:", lr,
+                    "\nLearning rate:", lr,
                 print(log)
                 log_file.write(log+ "\n")
                 log_file.flush()
