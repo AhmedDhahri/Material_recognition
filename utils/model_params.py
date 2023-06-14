@@ -7,7 +7,7 @@ from torchvision.models import vit_h_14, ViT_H_14_Weights
 
 
 class model_params:
-    def __init__(self, model_name='swinv2b'):
+    def __init__(self, model_name='swinv2b', load=False):
         if model_name == 'swinv2b':
             self.model = swin_v2_b(weights=Swin_V2_B_Weights.IMAGENET1K_V1)
         elif  model_name == 'vith14':
@@ -25,7 +25,7 @@ class model_params:
         self.checkpoint = 'Material_recognition/weights/' + model_name + '_minc.pth'
 
         
-        if LOAD:
+        if load:
             self.model.load_state_dict(torch.load(checkpoint), strict=False)
         self.model = model.train()
         self.model = model.cuda()

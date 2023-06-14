@@ -25,12 +25,8 @@ train_loader = MINCDataLoader(minc_path, labels_path, batch_size=BATCH_SIZE, siz
 test_loader = DataLoader(dataset=MINCDataset(minc_path, labels_path_t, size=(SIZE, SIZE)), 
                          batch_size=BATCH_SIZE, num_workers=0, pin_memory=False, shuffle=True)
 
-model, checkpoint, log_file = model_params(model_name=sys.argv[1]).get() #"swinv2b", "vith14", "eva02l14", "maxvitxl"
+model, checkpoint, log_file = model_params(model_name=sys.argv[1], laod=LOAD).get() #"swinv2b", "vith14", "eva02l14", "maxvitxl"
 
-if LOAD:
-    model.load_state_dict(torch.load(checkpoint), strict=False)
-model = model.train()
-model = model.cuda()
 optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=1e-8)
 lr_scheduler = CosineDecayLR(optimizer, LR, len(train_loader) * EPOCHS)
 loss = Metrics()
