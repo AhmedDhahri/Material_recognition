@@ -10,12 +10,16 @@ class model_params:
     def __init__(self, model_name='swinv2b', load=False):
         if model_name == 'swinv2b':
             self.model = swin_v2_b(weights=Swin_V2_B_Weights.IMAGENET1K_V1)
+            self.size = 256
         elif  model_name == 'vith14':
             self.model = vit_h_14(weights=ViT_H_14_Weights.IMAGENET1K_SWAG_LINEAR_V1)
+            self.size = 224
         elif  model_name == 'eva02l14':
             self.model = timm.create_model('eva02_large_patch14_448.mim_m38m_ft_in1k', pretrained=True)
+            self.size = 448
         elif  model_name == 'maxvitxl':
             self.model = timm.create_model('maxvit_xlarge_tf_512.in21k_ft_in1k', pretrained=True)
+            self.size = 512
         else:
             raise Exception("Sorry, model_name not valid!")
             exit()
@@ -31,4 +35,4 @@ class model_params:
         self.model = self.model.cuda()
 
     def get(self):
-        return self.model, self.checkpoint, self.log_file
+        return self.model, self.checkpoint, self.log_file, self.size

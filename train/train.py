@@ -18,14 +18,14 @@ labels_path_t = 'Material_recognition/datasets/minc/test.txt'
 
 BATCH_SIZE, EPOCHS, SIZE, LR = 8, 30, 256, 4e-5
 TRAIN_ITER, TEST_ITER, START, LOAD = 2000, 400, 0, False
-
+model, checkpoint, log_file, SIZE = model_params(model_name=sys.argv[1], load=LOAD).get() #"swinv2b", "vith14", "eva02l14", "maxvitxl"
 
 
 train_loader = MINCDataLoader(minc_path, labels_path, batch_size=BATCH_SIZE, size=SIZE, f=0.16)
 test_loader = DataLoader(dataset=MINCDataset(minc_path, labels_path_t, size=(SIZE, SIZE)), 
                          batch_size=BATCH_SIZE, num_workers=0, pin_memory=False, shuffle=True)
 
-model, checkpoint, log_file = model_params(model_name=sys.argv[1], load=LOAD).get() #"swinv2b", "vith14", "eva02l14", "maxvitxl"
+
 
 optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=1e-8)
 lr_scheduler = CosineDecayLR(optimizer, LR, len(train_loader) * EPOCHS)
