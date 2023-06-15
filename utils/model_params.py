@@ -11,7 +11,7 @@ class model_params:
         if model_name == 'swinv2b':
             self.model = swin_v2_b(weights=Swin_V2_B_Weights.IMAGENET1K_V1)
         elif  model_name == 'vith14':
-            self.model = vit_h_14(weights=ViT_H_14_Weights.IMAGENET1K_SWAG_E2E_V1)
+            self.model = vit_h_14(weights=ViT_H_14_Weights.IMAGENET1K_SWAG_LINEAR_V1)
         elif  model_name == 'eva02l14':
             self.model = timm.create_model('eva02_large_patch14_448.mim_m38m_ft_in1k', pretrained=True)
         elif  model_name == 'maxvitxl':
