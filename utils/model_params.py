@@ -30,7 +30,7 @@ class model_params:
 
         
         if load:
-            self.model.load_state_dict(torch.load(checkpoint), strict=False)
+            self.model.load_state_dict(torch.load(self.checkpoint), strict=False)
         self.model = self.model.eval()
         self.model = self.model.cuda()
 
