@@ -16,7 +16,7 @@ minc_path = 'Material_recognition/datasets/minc'
 labels_path = 'Material_recognition/datasets/minc/train.txt'
 labels_path_t = 'Material_recognition/datasets/minc/test.txt'
 
-BATCH_SIZE, EPOCHS, SIZE, LR = 8, 30, 256, 4e-5
+BATCH_SIZE, EPOCHS, SIZE, LR = 4, 30, 256, 4e-5
 TRAIN_ITER, TEST_ITER, START, LOAD = 2000, 400, 0, False
 model, checkpoint, log_file, SIZE = model_params(model_name=sys.argv[1], load=LOAD).get() #"swinv2b", "vith14", "eva02l14", "maxvitxl"
 
