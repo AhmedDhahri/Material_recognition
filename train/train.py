@@ -61,7 +61,7 @@ for epc in range(0, EPOCHS):
                     y_pred = model(x.cuda())
                     ac = ac + loss.accuracy(y_pred, y)
                 ac = ac/TEST_ITER
-                log = "Iteration:" + idx + "\nTest N"+ str(epc) + '-' + str(idx//TRAIN_ITER) + ' : '  +  str(float(ac)) + "\nLearning rate:" + LR
+                log = "Iteration:" + str(idx) + "\nTest N"+ str(epc) + '-' + str(idx//TRAIN_ITER) + ' : '  +  str(float(ac)) + "\nLearning rate:" + str(LR)
                 print(log)
                 log_file.write(log+ "\n")
                 log_file.flush()
