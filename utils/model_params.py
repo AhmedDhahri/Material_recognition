@@ -40,8 +40,6 @@ class model_params:
             raise Exception("Sorry, model_name not valid!")
             exit()
         self.log_file_path = 'Material_recognition/logs/' + model_name + '.log'
-        self.log_file = open(self.log_file_path, "w+")
-
         self.checkpoint = 'Material_recognition/weights/' + model_name + '_minc.pth'
 
         
@@ -51,4 +49,4 @@ class model_params:
         self.model = self.model.cuda()
 
     def get(self):
-        return self.model, self.checkpoint, self.log_file, self.size, self.bs
+        return self.model, self.checkpoint, self.log_file_path, self.size, self.bs
