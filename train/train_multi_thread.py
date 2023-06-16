@@ -17,27 +17,26 @@ minc_path = 'Material_recognition/datasets/minc'
 labels_path = 'Material_recognition/datasets/minc/train.txt'
 labels_path_t = 'Material_recognition/datasets/minc/test.txt'
 
-START, LOAD = 0, False
+LOAD, EPOCHS, LR, NUM_WORKERS = False, 10, 4e-5, 32
 model, checkpoint, log_file, SIZE, BATCH_SIZE = model_params(model_name=sys.argv[1], load=LOAD).get() #"swinv2b", "vith14", "eva02l14", "maxvitxl"
-EPOCHS, LR  = 10, 4e-5
-TRAIN_ITER, TEST_ITER  = int(80000 / BATCH_SIZE), int(8000 / BATCH_SIZE)
+TRAIN_ITER, TEST_ITER  = 80000 // BATCH_SIZE, 8000 // BATCH_SIZE
 
 
 train_loader = DataLoader(dataset=MINCDataset(minc_path, labels_path, size=(SIZE, SIZE)), 
-                         batch_size=BATCH_SIZE, num_workers=8, pin_memory=True, shuffle=True)
+                         batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, pin_memory=True, shuffle=True)
 test_loader = DataLoader(dataset=MINCDataset(minc_path, labels_path_t, size=(SIZE, SIZE)), 
-                         batch_size=BATCH_SIZE, num_workers=8, pin_memory=True, shuffle=True)
+                         batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, pin_memory=True, shuffle=True)
 optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=1e-8)
 lr_scheduler = CosineDecayLR(optimizer, LR, len(train_loader) * EPOCHS)
 loss = Metrics()
 
 #One epoch done
-for epc in range(0, EPOCHS):
-    ticket = "Epoch {} starting from iteration {}: ".format(epc, START)
+for epc in range(EPOCHS):
+    ticket = "Epoch {}: ".format(epc)
     log_file.write(ticket + "\n")
     
-    r = tqdm(train_loader, leave=False, desc=ticket, total=len(train_loader)-START)    
-    for idx, (x, y) in r:
+    r = tqdm(train_loader, leave=False, desc=ticket, total=len(train_loader))    
+    for idx, (x, y) in enumerate(r):
         y_pred = model(x.cuda())
         lf = loss.compute(y_pred, y)
         lf.backward()
@@ -46,12 +45,12 @@ for epc in range(0, EPOCHS):
         optimizer.zero_grad()
         r.set_postfix(loss=lf.item())
         
-        if idx % TRAIN_ITER == 0:
+        if idx % TRAIN_ITER == 0 & idx != 0:
             #save checkpoint
-            if idx != START:
+            if idx != 0:
                 torch.save(model.state_dict(), checkpoint)
             #decrease lr
-            LR = lr_scheduler.step(epc * len(train_loader) + START + idx)
+            LR = lr_scheduler.step(epc * len(train_loader) + idx)
             #test loss run on val
             with torch.no_grad():
                 ac = 0
@@ -64,7 +63,5 @@ for epc in range(0, EPOCHS):
                 print(log)
                 log_file.write(log+ "\n")
                 log_file.flush()
-			
-    START = 0
     torch.save(model.state_dict(), checkpoint)
     log_file.close()
