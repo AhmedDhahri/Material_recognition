@@ -26,6 +26,9 @@ class model_params:
         elif  model_name == 'maxvitxl':
             self.model = timm.create_model('maxvit_xlarge_tf_512.in21k_ft_in1k', pretrained=not load)
             self.size, self.bs = 512, 2
+        elif model_name == 'coatnet2':
+            self.model = timm.create_model('coatnet_2_rw_224.sw_in12k_ft_in1k', pretrained=not load)
+            self.size, self.bs = 224, 8
         else:
             raise Exception("Sorry, model_name not valid!")
             exit()
