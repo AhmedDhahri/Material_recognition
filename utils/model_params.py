@@ -4,7 +4,7 @@ import timm
 import torch
 import torch.nn as nn
 sys.path.append(sys.path[0]+'/../models')
-from moat import moat_4
+
 
 from torchvision.models import swin_v2_b, Swin_V2_B_Weights
 from torchvision.models import vit_h_14, ViT_H_14_Weights
@@ -33,9 +33,6 @@ class model_params:
         elif model_name == 'coatnet2':
             self.model = timm.create_model('coatnet_2_rw_224.sw_in12k_ft_in1k', pretrained=not load)
             self.size, self.bs = 384, 8
-        elif model_name == 'moat4':
-            self.model = moat_4()
-            self.size, self.bs = 224, 8
         else:
             raise Exception("Sorry, model_name not valid!")
             exit()
