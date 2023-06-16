@@ -4,6 +4,7 @@ import timm
 import torch
 import torch.nn as nn
 sys.path.append(sys.path[0]+'/../models')
+from models.moat import moat_4
 
 
 from torchvision.models import swin_v2_b, Swin_V2_B_Weights
