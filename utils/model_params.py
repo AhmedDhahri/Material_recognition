@@ -31,7 +31,7 @@ class model_params:
             self.model = timm.create_model('maxvit_xlarge_tf_512.in21k_ft_in1k', pretrained=not load)
             self.size, self.bs = 512, 2
         elif model_name == 'coatnet2':
-            self.model = timm.create_model('coatnet_rmlp_2_rw_384.sw_in12k_ft_in1k', pretrained=not load)
+            self.model = timm.create_model('coatnet_2_rw_224.sw_in12k_ft_in1k', pretrained=not load)
             self.size, self.bs = 384, 8
         elif model_name == 'moat4':
             self.model = moat_4()
