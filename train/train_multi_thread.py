@@ -18,7 +18,7 @@ minc_path = 'Material_recognition/datasets/minc'
 labels_path = 'Material_recognition/datasets/minc/train.txt'
 labels_path_t = 'Material_recognition/datasets/minc/test.txt'
 
-LOAD, EPOCHS, LR, NUM_WORKERS = ast.literal_eval(sys.argv[2]), 10, 4e-5, 32
+LOAD, EPOCHS, LR, NUM_WORKERS = ast.literal_eval(sys.argv[2]), 5, 4e-5, 32
 print("Loading pre-trained  weights:", LOAD)
 model, checkpoint, log_file, SIZE, BATCH_SIZE = model_params(model_name=sys.argv[1], load=LOAD).get() #"swinv2b", "vith14", "eva02l14", "maxvitxl"
 TRAIN_ITER, TEST_ITER  = 80000 // BATCH_SIZE, 8000 // BATCH_SIZE
