@@ -19,12 +19,14 @@ minc_path = 'Material_recognition/datasets/minc'
 labels_path_t = 'Material_recognition/datasets/minc/test.txt'
 checkpoint = "Material_recognition/weights/swinv2b_minc.pth"
 
-
+MODEL_NAME, NUM_WORKERS = sys.argv[1], ast.literal_eval(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
 dataloader = DataLoader(dataset=MINCDataset(minc_path, labels_path_t, size=(size, size)), 
-            batch_size=16, num_workers=0, pin_memory=False, shuffle=True)
-model, _, _, SIZE, BATCH_SIZE = model_params(model_name=sys.argv[1], 
-            load=LOAD).get() #"swinv2b", "vith14", "eva02l14", "maxvitxl"
+            batch_size=16, num_workers=NUM_WORKERS, pin_memory=False, shuffle=True)
+model, _, _, SIZE, BATCH_SIZE = model_params(model_name=MODEL_NAME, load=True).get()
 loss = Metrics()
+
+print("Loading pre-trained weights", MODEL_NAME, ":", LOAD)
+print("Num workers:", NUM_WORKERS)
 
 with torch.no_grad():
         r = tqdm(enumerate(dataloader), leave=False, desc="Test: ", total=len(dataloader))
