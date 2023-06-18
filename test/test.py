@@ -25,7 +25,7 @@ dataloader = DataLoader(dataset=MINCDataset(minc_path, labels_path_t, size=(size
 model, _, _, SIZE, BATCH_SIZE = model_params(model_name=MODEL_NAME, load=True).get()
 loss = Metrics()
 
-print("Loading pre-trained weights", MODEL_NAME, ":", LOAD)
+print("Model name:", MODEL_NAME)
 print("Num workers:", NUM_WORKERS)
 
 with torch.no_grad():
@@ -42,8 +42,8 @@ with torch.no_grad():
 
             ac1 /= i
             ac5 /= i
-            print("Top 1 error ", ac1 * 100, "Top 5 error ", ac5 * 100)
+            print("Top 1 acccuracy ", ac1 * 100, "Top 5 error ", ac5 * 100)
         except KeyboardInterrupt:
             ac1 /= i
             ac5 /= i
-            print("Top 1 error ", ac1 * 100, "Top 5 error ", ac5 * 100)
+            print("Top 1 acccuracy ", ac1 * 100, "Top 5 error ", ac5 * 100)
