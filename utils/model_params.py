@@ -1,6 +1,11 @@
+
+import sys
 import timm
 import torch
 import torch.nn as nn
+sys.path.append(sys.path[0]+'/../models')
+from models.moat import moat_4
+
 
 from torchvision.models import swin_v2_b, Swin_V2_B_Weights
 from torchvision.models import vit_h_14, ViT_H_14_Weights
@@ -26,12 +31,16 @@ class model_params:
         elif  model_name == 'maxvitxl':
             self.model = timm.create_model('maxvit_xlarge_tf_512.in21k_ft_in1k', pretrained=not load)
             self.size, self.bs = 512, 2
+        elif model_name == 'coatnet2':
+            self.model = timm.create_model('coatnet_rmlp_2_rw_384.sw_in12k_ft_in1k', pretrained=not load)
+            self.size, self.bs = 384, 8
+        elif model_name == 'moat4':
+            self.model = moat_4()
+            self.size, self.bs = 224, 8
         else:
             raise Exception("Sorry, model_name not valid!")
             exit()
         self.log_file_path = 'Material_recognition/logs/' + model_name + '.log'
-        self.log_file = open(self.log_file_path, "w+")
-
         self.checkpoint = 'Material_recognition/weights/' + model_name + '_minc.pth'
 
         
@@ -41,4 +50,4 @@ class model_params:
         self.model = self.model.cuda()
 
     def get(self):
-        return self.model, self.checkpoint, self.log_file, self.size, self.bs
+        return self.model, self.checkpoint, self.log_file_path, self.size, self.bs
