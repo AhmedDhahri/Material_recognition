@@ -1,5 +1,6 @@
 import ast
 import sys
+import time
 sys.path.append(sys.path[0]+'/../')
 sys.path.append(sys.path[0]+'/../utils')
 
@@ -32,12 +33,13 @@ test_loader = DataLoader(dataset=MINCDataset(minc_path, labels_path_t, size=(SIZ
 optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=1e-8)
 lr_scheduler = CosineDecayLR(optimizer, LR, len(train_loader) * EPOCHS)
 loss = Metrics()
-
+log_file = open(log_file_path, "w+")
+log_file.write("Starting at time stamp {}".format(time.time()))
 
 #One epoch done
 for epc in range(START, EPOCHS):
-    log_file = open(log_file_path, "w+")
-    ticket = "Epoch {}: ".format(epc)
+    log_file = open(log_file_path, "a+")
+    ticket = "Epoch {} at time stamp {}".format(epc, time.time())
     log_file.write(ticket + "\n")
     
     r = tqdm(train_loader, leave=False, desc=ticket, total=len(train_loader))    
