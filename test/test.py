@@ -21,9 +21,9 @@ labels_path_t = 'Material_recognition/datasets/minc/test.txt'
 checkpoint = "Material_recognition/weights/swinv2b_minc.pth"
 
 MODEL_NAME, NUM_WORKERS = sys.argv[1], int(sys.argv[2])
-dataloader = DataLoader(dataset=MINCDataset(minc_path, labels_path_t, size=(size, size)), 
-            batch_size=16, num_workers=NUM_WORKERS, pin_memory=False, shuffle=True)
 model, _, _, SIZE, BATCH_SIZE = model_params(model_name=MODEL_NAME, load=True).get()
+dataloader = DataLoader(dataset=MINCDataset(minc_path, labels_path_t, size=(SIZE, SIZE)), 
+            batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, pin_memory=True, shuffle=True)
 loss = Metrics()
 
 print("Model name:", MODEL_NAME)
