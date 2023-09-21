@@ -14,7 +14,7 @@ from utils import CosineDecayLR, Metrics
 from model_params import model_params
 
 #use python 3.10- pip3 install torch torchvision tqdm timm
-EPOCHS, LR = 5, 4e-5
+EPOCHS, LR = 10, 4e-5
 minc_path = 'Material_recognition/datasets/minc'
 labels_path = 'Material_recognition/datasets/minc/train.txt'
 labels_path_t = 'Material_recognition/datasets/minc/test.txt'
@@ -44,7 +44,7 @@ for epc in range(START, EPOCHS):
     
     r = tqdm(train_loader, leave=False, desc=ticket, total=len(train_loader))    
     for idx, (x, y) in enumerate(r):
-        y_pred = model(x.cuda())
+        y_pred = model(x.cuda(non_blocking=True))
         lf = loss.compute(y_pred, y)
         lf.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
