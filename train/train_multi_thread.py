@@ -14,8 +14,6 @@ from utils import CosineDecayLR, Metrics
 from model_params import model_params
 
 import torch.distributed as dist
-from apex.parallel import DistributedDataParallel as DDP
-from apex import amp
 
 #use python 3.10- pip3 install torch torchvision tqdm timm
 EPOCHS, LR = 10, 4e-5
