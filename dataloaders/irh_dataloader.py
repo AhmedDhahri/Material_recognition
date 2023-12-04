@@ -1,5 +1,6 @@
 from torch.utils.data import Dataset
 from torchvision.io import read_image
+from torch.utils.data import DataLoader
 import torch
 import numpy as np
 import cv2
@@ -18,7 +19,9 @@ class IRHDataset(Dataset):
         Y = int(self.data[index][3])
         file_id = int(self.data[index][0])
         mod = "rgb"
-        rgb_path = self.dir + '/' + mod + '/' + "%06d_" % file_id + mod + ".png"
+        rgb_path = self.dir + '/' + "rgb" + '/' + "%06d_" % file_id + "rgb" + ".png"
+        rgb_path = self.dir + '/' + "nir" + '/' + "%06d_" % file_id + "nir" + ".png"
+        rgb_path = self.dir + '/' + "dpt" + '/' + "%06d_" % file_id + "dpt" + ".png"
         rgb = cv2.imread(rgb_path)
 
 
@@ -28,7 +31,7 @@ class IRHDataset(Dataset):
         x = int(x * w)
         y = float(self.data[index][2])
         y = int(y * h)
-        s = 150
+        s = 25 + self.size[0]//2
         if x < s:
             s = x
         elif x > w-s:
@@ -44,3 +47,8 @@ class IRHDataset(Dataset):
         X = np.float32(cv2.resize(X, self.size))
         X = torch.from_numpy(X).permute(2, 0, 1)
         return X, Y
+
+dataset = IRHDataset("../datasets/irh/files/img_raw", "../datasets/irh/dataset.csv", (256, 256))
+loader = DataLoader(dataset=dataset, batch_size=4, num_workers=0, pin_memory=False, shuffle=True)
+X, Y = next(iter(loader))
+print(X.shape,Y)
