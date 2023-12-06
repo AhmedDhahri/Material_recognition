@@ -47,8 +47,3 @@ class IRHDataset(Dataset):
         X = np.float32(cv2.resize(X, self.size))
         X = torch.from_numpy(X).permute(2, 0, 1)
         return X, Y
-
-dataset = IRHDataset("../datasets/irh/files/img_raw", "../datasets/irh/dataset.csv", (256, 256))
-loader = DataLoader(dataset=dataset, batch_size=4, num_workers=0, pin_memory=False, shuffle=True)
-X, Y = next(iter(loader))
-print(X.shape,Y)
