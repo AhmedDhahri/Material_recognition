@@ -7,17 +7,18 @@ import torch.nn as nn
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 
-from dataloaders.minc_dataloader import MINCDataset, MINCDataLoader
+from dataloaders.irh_dataloader import IRHDataset
 from utils import CosineDecayLR, Metrics
 from model_params import model_params
 
 
 LOAD = False
-model, checkpoint, log_file, SIZE, BATCH_SIZE = model_params(model_name=sys.argv[1], load=LOAD).get() #"swinv2b", "vith14", "eva02l14", "maxvitxl"
+model, _, log_file, SIZE, BATCH_SIZE = model_params(model_name=sys.argv[1], load=LOAD).get() #"swinv2b", "vith14", "eva02l14", "maxvitxl", coatnet2
 EPOCHS, LR  = 10, 4e-5
+checkpoint = 'Material_recognition/weights/' + sys.argv[1] + '_irh.pth'
 
-dataset = IRHDataset("../datasets/irh/files/img_raw", "../datasets/irh/dataset.csv", (256, 256))
-loader = DataLoader(dataset=dataset, batch_size=4, num_workers=0, pin_memory=False, shuffle=True)
+train_dataset = IRHDataset("../datasets/irh/files/img_raw", "../datasets/irh/dataset.csv", (SIZE, SIZE))
+train_loader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, num_workers=0, pin_memory=False, shuffle=True)
 
 optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=1e-8)
 lr_scheduler = CosineDecayLR(optimizer, LR, len(train_loader) * EPOCHS)
@@ -28,7 +29,7 @@ for epc in range(0, EPOCHS):
     ticket = "Epoch {} starting from iteration {}: ".format(epc, START)
     log_file.write(ticket + "\n")
     
-    r = tqdm(loader), leave=False, desc=ticket, total=len(loader))    
+    r = tqdm(train_loader), leave=False, desc=ticket, total=len(train_loader))    
     for idx, x, y in r:
         y_pred = model(x.cuda())
         lf = loss.compute(y_pred, y)
