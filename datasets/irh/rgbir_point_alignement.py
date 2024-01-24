@@ -22,11 +22,11 @@ cv2.namedWindow(window_name_nir)
 cv2.setMouseCallback(window_name_rgb, callback_rgb)
 cv2.setMouseCallback(window_name_nir, callback_nir)
 
-for f in listdir("img_raw/rgb"):
+for f in listdir("files/img_raw/rgb"):
     id = f.split('_')[0]
-    path_rgb = "img_raw/rgb/" + id + "_rgb.png"
-    path_nir = "img_raw/nir/" + id + "_nir.png"
-    path_dpt = "img_raw/dpt/" + id + "_dpt.png"
+    path_rgb = "files/img_raw/rgb/" + id + "_rgb.png"
+    path_nir = "files/img_raw/nir/" + id + "_nir.png"
+    path_dpt = "files/img_raw/dpt/" + id + "_dpt.png"
     img_rgb = cv2.resize(cv2.imread(path_rgb), (1280, 720))
     img_nir = cv2.resize(cv2.imread(path_nir), (1280, 720))
     img_dpt = cv2.resize(cv2.imread(path_dpt), (1280, 720))

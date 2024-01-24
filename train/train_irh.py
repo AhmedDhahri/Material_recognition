@@ -2,6 +2,7 @@ import sys
 sys.path.append(sys.path[0]+'/../')
 sys.path.append(sys.path[0]+'/../utils')
 
+import timm
 import torch
 import torch.nn as nn
 from tqdm import tqdm
@@ -10,16 +11,68 @@ from torch.utils.data import DataLoader
 from dataloaders.irh_dataloader import IRHDataset
 from utils import CosineDecayLR, Metrics
 from model_params import model_params
+from timm.layers import SelectAdaptivePool2d
 
+class classifier(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.adapool = SelectAdaptivePool2d(pool_type='avg', flatten=nn.Flatten(start_dim=1, end_dim=-1))
+    def forward(self, x, pre_logits):
+        return self.adapool(x)
+
+class coatnet_full(nn.Module):
+    def __init__(self, experiment):
+        super().__init__()
+        self.experiment = experiment
+        if experiment >= 0:
+            self.bb_rgb = timm.create_model('coatnet_rmlp_2_rw_384.sw_in12k_ft_in1k', pretrained=True)
+            self.bb_rgb.head = classifier()
+            self.fc = nn.Linear(in_features=1024, out_features=15, bias=True)
+
+        if experiment >= 1:
+            self.bb_nir = timm.create_model('coatnet_rmlp_2_rw_384.sw_in12k_ft_in1k', pretrained=True)
+            self.bb_nir.head = classifier()
+            self.fc = nn.Linear(in_features=2*1024, out_features=15, bias=True)
+
+        if experiment >= 2:
+            self.bb_dpt = timm.create_model('coatnet_rmlp_2_rw_384.sw_in12k_ft_in1k', pretrained=True)
+            self.bb_dpt.head = classifier()
+            self.fc = nn.Linear(in_features=3*1024, out_features=15, bias=True)
+
+    def forward(self, x_rgb, x_nir, x_dpt):
+
+        if self.experiment >= 0:
+            x_rgb = self.bb_rgb(x_rgb)
+        
+        if self.experiment >= 1:
+            x_nir = self.bb_nir(x_nir)
+            x_rgb = torch.cat((x_rgb, x_nir), -1)
+
+        if self.experiment >= 2:
+            x_dpt = self.bb_dpt(x_dpt)
+            x_rgb = torch.cat((x_rgb, x_nir, x_dpt), -1)
+
+        return self.fc(x_rgb)
 
 LOAD = True
-model, _, log_file, SIZE, BATCH_SIZE = model_params(model_name=sys.argv[1], load=LOAD).get() #"swinv2b", "vith14", "eva02l14", "maxvitxl", coatnet2
-log_file = open(log_file, "a")
-EPOCHS, LR  = 30, 4e-5
-checkpoint = 'Material_recognition/weights/' + sys.argv[1] + '_irh.pth'
+#model, _, log_file, SIZE, BATCH_SIZE = model_params(model_name=sys.argv[1], load=LOAD).get() #"swinv2b", "vith14", "eva02l14", "maxvitxl", coatnet2
+SIZE, BATCH_SIZE, LR, EPOCHS, EXPERIMENT  = 384, 1, 4e-5, 5, 1
+model = coatnet_full(EXPERIMENT).cuda()
 
-train_dataset = IRHDataset("Material_recognition/datasets/irh/files/img_raw", "Material_recognition/datasets/irh/dataset.csv", (SIZE, SIZE))
-train_loader = DataLoader(dataset=train_dataset, batch_size=1, num_workers=4, pin_memory=False, shuffle=True)
+#checkpoint = 'Material_recognition/weights/' + sys.argv[1] + '_irh.pth'
+
+
+if EXPERIMENT == 0:
+    net_name = 'coatnet2_rgb' 
+elif EXPERIMENT == 1:
+    net_name = 'coatnet2_rgb_nir' 
+elif EXPERIMENT == 2:
+    net_name = 'coatnet2_full' 
+
+checkpoint, log_file = 'Material_recognition/weights/' + net_name + '_irh.pth', open('Material_recognition/logs/' + net_name + '.log', "a")
+
+train_dataset = IRHDataset("Material_recognition/datasets/irh/files/img_raw", "Material_recognition/datasets/irh/dataset.csv", (SIZE, SIZE), EXPERIMENT)
+train_loader = DataLoader(dataset=train_dataset, batch_size=1, num_workers=1, pin_memory=True, shuffle=True)
 
 optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=1e-8)
 lr_scheduler = CosineDecayLR(optimizer, LR, len(train_loader) * EPOCHS)
@@ -31,15 +84,22 @@ for epc in range(0, EPOCHS):
     log_file.write(ticket + "\n")
     
     r = tqdm((train_loader), leave=False, desc=ticket, total=len(train_loader))    
-    for x, y in r:
-        y_pred = model(x.cuda())
-        lf = loss(y_pred, y.cuda())
+    for X, Y in r:
+        if EXPERIMENT == 0:
+            x_rgb, x_nir, x_dpt = X, torch.Tensor(0), torch.Tensor(0)
+        elif EXPERIMENT == 1:
+            (x_rgb, x_nir), x_dpt = X, torch.Tensor(0)
+        elif EXPERIMENT == 2:
+            x_rgb, x_nir, x_dpt = X
+
+        y_pred = model(x_rgb.cuda(), x_nir.cuda(), x_dpt.cuda())
+        lf = loss(y_pred, Y.cuda())
         lf.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
         optimizer.step()
         optimizer.zero_grad()
         r.set_postfix(loss=lf.item())
     #decrease lr
-    LR = lr_scheduler.step(epc * len(train_loader) + idx)
+    LR = lr_scheduler.step(epc * len(train_loader))
     torch.save(model.state_dict(), checkpoint)
 log_file.close()
