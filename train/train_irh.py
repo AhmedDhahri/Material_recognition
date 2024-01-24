@@ -54,25 +54,25 @@ class coatnet_full(nn.Module):
 
         return self.fc(x_rgb)
 
-LOAD = True
+BATCH_SIZE, EPOCHS, EXPERIMENT, LOAD = int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), True
 #model, _, log_file, SIZE, BATCH_SIZE = model_params(model_name=sys.argv[1], load=LOAD).get() #"swinv2b", "vith14", "eva02l14", "maxvitxl", coatnet2
-SIZE, BATCH_SIZE, LR, EPOCHS, EXPERIMENT  = 384, 1, 4e-5, 5, 1
+SIZE, LR  = 384, 4e-5
 model = coatnet_full(EXPERIMENT).cuda()
 
-#checkpoint = 'Material_recognition/weights/' + sys.argv[1] + '_irh.pth'
-
-
+global net_name 
 if EXPERIMENT == 0:
-    net_name = 'coatnet2_rgb' 
+    net_name = 'coatnet2_rgb_irh' 
 elif EXPERIMENT == 1:
-    net_name = 'coatnet2_rgb_nir' 
+    net_name = 'coatnet2_rgb_nir_irh' 
 elif EXPERIMENT == 2:
-    net_name = 'coatnet2_full' 
+    net_name = 'coatnet2_full_irh' 
+else:
+    print(EXPERIMENT, "is invalid.")
+    exit(0)
 
-checkpoint, log_file = 'Material_recognition/weights/' + net_name + '_irh.pth', open('Material_recognition/logs/' + net_name + '.log', "a")
-
+checkpoint, log_file = 'Material_recognition/weights/' + net_name + '.pth', open('Material_recognition/logs/' + net_name + '.log', "a")
 train_dataset = IRHDataset("Material_recognition/datasets/irh/files/img_raw", "Material_recognition/datasets/irh/dataset.csv", (SIZE, SIZE), EXPERIMENT)
-train_loader = DataLoader(dataset=train_dataset, batch_size=1, num_workers=1, pin_memory=True, shuffle=True)
+train_loader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, num_workers=1, pin_memory=True, shuffle=True)
 
 optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=1e-8)
 lr_scheduler = CosineDecayLR(optimizer, LR, len(train_loader) * EPOCHS)
