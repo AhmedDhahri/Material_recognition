@@ -38,7 +38,7 @@ class coatnet_full(nn.Module):
             self.bb_dpt = timm.create_model('coatnet_rmlp_2_rw_384.sw_in12k_ft_in1k', pretrained=True)
             self.bb_dpt.head = classifier()
             self.fc = nn.Linear(in_features=3*1024, out_features=15, bias=True)
-        self.softmax = nn.Softmax(15)
+        self.softmax = nn.Softmax(-1)
 
     def forward(self, x_rgb, x_nir, x_dpt):
 
