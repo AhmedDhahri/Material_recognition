@@ -44,9 +44,7 @@ class coatnet_full(nn.Module):
         self.softmax = nn.Softmax(-1)
 
     def forward(self, x_rgb, x_nir, x_dpt):
-
-        if self.experiment >= 0:
-            x_rgb = self.bb_rgb(x_rgb)
+        x_rgb = self.bb_rgb(x_rgb)
         
         if self.experiment >= 1:
             x_nir = self.bb_nir(x_nir)
@@ -54,8 +52,8 @@ class coatnet_full(nn.Module):
 
         if self.experiment >= 2:
             x_dpt = self.bb_dpt(x_dpt)
-            x_rgb = torch.cat((x_rgb, x_nir, x_dpt), -1)
-
+            x_rgb = torch.cat((x_rgb, x_dpt), -1)
+        
         return self.softmax(self.fc(x_rgb))
 
 BATCH_SIZE, EPOCHS, EXPERIMENT, LOAD = int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), True
