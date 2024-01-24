@@ -48,10 +48,10 @@ while i < len(img_list):
     path_nir = "files/img_raw/nir/" + id + "_nir.png"
     path_dpt = "files/img_raw/dpt/" + id + "_dpt.png"
     img_rgb = cv2.imread(path_rgb)
-    '''    if img_rgb.shape == (720, 1280, 3):
+    if img_rgb.shape == (720, 1280, 3):
         a, c = 184, 200
     elif img_rgb.shape == (480, 640, 3):
-        a,c = 295, 311'''
+        a,c = 295, 311
     img_rgb = cv2.resize(img_rgb, (1280, 720))
     img_nir = cv2.resize(cv2.imread(path_nir), (1280, 720))
     img_dpt = cv2.resize(cv2.imread(path_dpt), (1280, 720))
