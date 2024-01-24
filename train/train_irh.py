@@ -38,7 +38,7 @@ class coatnet_full(nn.Module):
             self.bb_dpt = timm.create_model('coatnet_rmlp_2_rw_384.sw_in12k_ft_in1k', pretrained=True)
             self.bb_dpt.head = classifier()
             self.fc = nn.Linear(in_features=3*1024, out_features=15, bias=True)
-         = nn.Softmax(15)
+        self.softmax = nn.Softmax(15)
 
     def forward(self, x_rgb, x_nir, x_dpt):
 
@@ -73,7 +73,7 @@ else:
 
 checkpoint, log_file = 'Material_recognition/weights/' + net_name + '.pth', open('Material_recognition/logs/' + net_name + '.log', "a")
 train_dataset = IRHDataset("Material_recognition/datasets/irh/files/img_raw", "Material_recognition/datasets/irh/dataset.csv", (SIZE, SIZE), EXPERIMENT)
-train_loader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, num_workers=24, pin_memory=True, shuffle=True)
+train_loader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, num_workers=BATCH_SIZE, pin_memory=True, shuffle=True)
 
 optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=1e-8)
 lr_scheduler = CosineDecayLR(optimizer, LR, len(train_loader) * EPOCHS)
