@@ -41,7 +41,6 @@ class coatnet_full(nn.Module):
             self.bb_dpt.load_state_dict(torch.load("Material_recognition/weights/coatnet2_minc.pth"), strict=False)
             self.bb_dpt.head = classifier()
             self.fc = nn.Linear(in_features=3*1024, out_features=15, bias=True)
-        self.softmax = nn.Softmax(-1)
 
     def forward(self, x_rgb, x_nir, x_dpt):
         x_rgb = self.bb_rgb(x_rgb)
@@ -53,8 +52,8 @@ class coatnet_full(nn.Module):
         if self.experiment >= 2:
             x_dpt = self.bb_dpt(x_dpt)
             x_rgb = torch.cat((x_rgb, x_dpt), -1)
-        
-        return self.softmax(self.fc(x_rgb))
+    
+        return self.fc(x_rgb)
 
 BATCH_SIZE, EPOCHS, EXPERIMENT, LOAD = int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), True
 #model, _, log_file, SIZE, BATCH_SIZE = model_params(model_name=sys.argv[1], load=LOAD).get() #"swinv2b", "vith14", "eva02l14", "maxvitxl", coatnet2
