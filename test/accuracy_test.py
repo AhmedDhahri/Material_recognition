@@ -23,6 +23,7 @@ checkpoint = "Material_recognition/weights/swinv2b_minc.pth"
 MODEL_NAME, NUM_WORKERS = sys.argv[1], int(sys.argv[3])
 dataloader = DataLoader(dataset=MINCDataset(minc_path, labels_path_t, size=(size, size)), 
             batch_size=16, num_workers=NUM_WORKERS, pin_memory=False, shuffle=True)
+#list of dataloaders specific to one class
 model, _, _, SIZE, BATCH_SIZE = model_params(model_name=MODEL_NAME, load=True).get()
 loss = Metrics()
 

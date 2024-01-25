@@ -1,13 +1,14 @@
+import sys
+sys.path.append(sys.path[0] + "/../..")
 import glob
 from models.googlenet import googlenet
+from models.coatnet2_multimodal import coatnet_full
 import numpy as np
 import cv2
 import os
 import matplotlib.pyplot as plt
-import sys
 import torch
 import torch.nn as nn
-from models.coatnet2_multimodal import coatnet_full
 
 import pydensecrf.densecrf as dcrf
 import pydensecrf.utils as utils

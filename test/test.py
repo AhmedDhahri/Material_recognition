@@ -24,6 +24,19 @@ MODEL_NAME, NUM_WORKERS = sys.argv[1], int(sys.argv[2])
 model, _, _, SIZE, BATCH_SIZE = model_params(model_name=MODEL_NAME, load=True).get()
 dataloader = DataLoader(dataset=MINCDataset(minc_path, labels_path_t, size=(SIZE, SIZE)), 
             batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, pin_memory=True, shuffle=True)
+
+#add specific dataloaders list
+#convert minc results. drop classes
+
+
+#zero-shot accuracy. 
+#minc accuracy dropping classes. 
+#finetuned models test on minc. 
+#fine tuned models test on irh. 
+#crf test.
+
+
+#devide data ipynb test and train.
 loss = Metrics()
 
 print("Model name:", MODEL_NAME)
