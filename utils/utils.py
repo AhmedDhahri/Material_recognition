@@ -72,13 +72,13 @@ class Metrics:
         self.gpu = gpu
 
     def accuracy(self, y_pred, y):
-        y_pred = torch.argmax(y_pred, 1)
+        y_pred = torch.argmax(y_pred, 1).detach().cpu()
         return 100 * torch.sum(y == y_pred)/y_pred.shape[0]
 
     def accuracies(self, y_pred, y):
         true_pred_5 = 0
         true_pred_1 = 0
-        y_pred = torch.argsort(y_pred, dim=1, descending=True)[:, :5]
+        y_pred = torch.argsort(y_pred, dim=1, descending=True)[:, :5].detach().cpu()
         y = torch.argmax(y, 1)
         for i in range(y_pred.shape[0]):
             if y[i] == y_pred[i, 0]:
