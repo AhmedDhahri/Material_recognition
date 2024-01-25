@@ -1,3 +1,8 @@
+import timm
+import torch
+import torch.nn as nn
+from timm.layers import SelectAdaptivePool2d
+
 class classifier(nn.Module):
     def __init__(self):
         super().__init__()
