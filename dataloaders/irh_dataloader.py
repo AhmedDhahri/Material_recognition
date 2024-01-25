@@ -5,7 +5,7 @@ import torch
 import numpy as np
 import cv2
 import random
-from torchvision.transforms import v2
+from torchvision import transforms as v2
 
 class IRHDataset(Dataset):
     def __init__(self, dir, labels, size, experiment=0):
