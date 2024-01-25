@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import sys
 import torch
 import torch.nn as nn
+from models.coatnet2_multimodal import coatnet_full
 
 import pydensecrf.densecrf as dcrf
 import pydensecrf.utils as utils
@@ -16,7 +17,7 @@ from torchvision.models import resnet50
 color_palette = np.loadtxt('./palette.txt').astype(np.uint8)
 path = "../../datasets/irh/files/img_raw/rgb/"
 ch = 23
-minc = True
+minc = False
 l = os.listdir(path)
 sorted(l)
 
@@ -68,6 +69,7 @@ def inference_on_whole_image(img, model):
     for i in range(nh-1):
         for j in range(nw-1):
             img_patch = img[:,:,i*128:(i+2)*128, j*128:(j+2)*128]
+            #add imshow rectangle on the image
             pred = model(img_patch)
             pred = softmax(pred)
             if minc:
@@ -128,18 +130,20 @@ class DenseCRF(object):
 print()
 #2,6,10, 33
 i = int(sys.argv[1])
-minc = True
-ch = 23
+ch = 15
+
+m = coatnet_full(0)
+m.load_state_dict(torch.load('../../weights/coatnet2_rgb_irh.pth'), strict=False)
 """
 m = resnet50()
 m.fc = nn.Linear(m.fc.in_features, ch)
 m.load_state_dict(torch.load('../../weights/resnet50_minc.pth'), strict=False)
 m.cuda().eval()
-"""
+
 m = googlenet()
 m.load_state_dict(torch.load('../../weights/minc-googlenet.pth'), strict=False)
 m.cuda().eval()
-
+"""
 torch.set_grad_enabled(False)
 if ch ==23:
     labels = open('categories.txt', 'r').readlines()
@@ -158,7 +162,7 @@ postprocessor = DenseCRF(
 )
 print(l[i])
 img = cv2.imread(path + l[i])
-img = cv2.resize(img, (512, 512))
+img = cv2.resize(img, (1280, 720))
 
 prob0 = multi_scale_inference(img, m)
 #prob1 = multi_scale_inference(img, m1)
@@ -175,7 +179,7 @@ labelmap = np.argmax(prob, axis=0)
 
 mask = color_image_w_masks(img, labelmap)
 
-cv2.imwrite("minc_inf.png", cv2.resize(mask, (640, 480)))
+cv2.imwrite("minc_inf.png", cv2.resize(mask, (1280, 720)))
 
 img = np.concatenate([img, mask], axis=1)
 #cv2.imshow('img', img)
