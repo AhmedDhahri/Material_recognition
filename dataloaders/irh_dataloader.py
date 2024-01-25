@@ -64,6 +64,7 @@ class IRHDataset(Dataset):
             X_nir = np.float32(cv2.resize(X_nir, self.size))
             X_nir = torch.from_numpy(X_nir).permute(2, 0, 1)
 
+            X_rgb = self.blur_transform(X_rgb)
             X_rgb, X_nir = self.transforms([X_rgb, X_nir])
             return (X_rgb, X_nir), Y
 
@@ -86,5 +87,6 @@ class IRHDataset(Dataset):
             X_dpt = np.float32(cv2.resize(X_dpt, self.size))
             X_dpt = torch.from_numpy(X_dpt).permute(2, 0, 1)
 
+            X_rgb = self.blur_transform(X_rgb)
             X_rgb, X_nir, X_dpt = self.transforms([X_rgb, X_nir, X_dpt])
             return (X_rgb, X_nir, X_dpt), Y
