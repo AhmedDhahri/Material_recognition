@@ -13,3 +13,4 @@ dataloaders/__pycache__/
 models/__pycache__/
 utils/__pycache__/
 test/crf/masks/*
+test/crf/models/__pycache__/*
