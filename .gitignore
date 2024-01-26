@@ -12,3 +12,4 @@ utils/VGG16/GrayVGG16_FC_BN_epoch120_batchsize32.pth
 dataloaders/__pycache__/
 models/__pycache__/
 utils/__pycache__/
+test/crf/masks/*
