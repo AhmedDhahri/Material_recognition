@@ -11,24 +11,27 @@ class classifier(nn.Module):
         return self.adapool(x)
 
 class coatnet_full(nn.Module):
-    def __init__(self, experiment):
+    def __init__(self, experiment, load=True):
         super().__init__()
         self.experiment = experiment
         if experiment >= 0:
             self.bb_rgb = timm.create_model('coatnet_rmlp_2_rw_384.sw_in12k_ft_in1k', pretrained=False)
-            self.bb_rgb.load_state_dict(torch.load("Material_recognition/weights/coatnet2_minc.pth"), strict=False)
+            if load:
+                self.bb_rgb.load_state_dict(torch.load("Material_recognition/weights/coatnet2_minc.pth"), strict=False)
             self.bb_rgb.head = classifier()
             self.fc = nn.Linear(in_features=1024, out_features=15, bias=True)
 
         if experiment >= 1:
             self.bb_nir = timm.create_model('coatnet_rmlp_2_rw_384.sw_in12k_ft_in1k', pretrained=False)
-            self.bb_nir.load_state_dict(torch.load("Material_recognition/weights/coatnet2_minc.pth"), strict=False)
+            if load:
+                self.bb_nir.load_state_dict(torch.load("Material_recognition/weights/coatnet2_minc.pth"), strict=False)
             self.bb_nir.head = classifier()
             self.fc = nn.Linear(in_features=2*1024, out_features=15, bias=True)
 
         if experiment >= 2:
             self.bb_dpt = timm.create_model('coatnet_rmlp_2_rw_384.sw_in12k_ft_in1k', pretrained=False)
-            self.bb_dpt.load_state_dict(torch.load("Material_recognition/weights/coatnet2_minc.pth"), strict=False)
+            if load:
+                self.bb_dpt.load_state_dict(torch.load("Material_recognition/weights/coatnet2_minc.pth"), strict=False)
             self.bb_dpt.head = classifier()
             self.fc = nn.Linear(in_features=3*1024, out_features=15, bias=True)
 
