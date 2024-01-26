@@ -1,8 +1,6 @@
 import sys
 sys.path.append(sys.path[0] + "/../..")
 import glob
-from models.googlenet import googlenet
-from models.coatnet2_multimodal import coatnet_full
 import numpy as np
 import cv2
 import os
@@ -13,14 +11,11 @@ import torch.nn as nn
 import pydensecrf.densecrf as dcrf
 import pydensecrf.utils as utils
 
+from models.googlenet import googlenet
 from torchvision.models import resnet50
+from models.coatnet2_multimodal import coatnet_full
+torch.set_grad_enabled(False)
 
-color_palette = np.loadtxt('./palette.txt').astype(np.uint8)
-path = "../../datasets/irh/files/img_raw/rgb/"
-ch = 23
-minc = False
-l = os.listdir(path)
-sorted(l)
 
 def color_image_w_masks(image, masks):
     image = image.astype(np.uint8)
@@ -41,21 +36,21 @@ def color_image_w_masks(image, masks):
 
 def inference_on_whole_image(img, model):
     h,w,c = img.shape
-    if h % 256 != 0:
-        h_ = (h // 256 + 1) * 256
+    if h % size != 0:
+        h_ = (h // size + 1) * size
     else:
         h_ = h
-    if w %  256 != 0:
-        w_ = (w // 256 + 1) * 256
+    if w %  size != 0:
+        w_ = (w // size + 1) * size
     else:
         w_ = w
-    nh = h_ // 128
-    nw = w_ // 128
+    nh = h_ // (size//2)
+    nw = w_ // (size//2)
 
     #load tensor and resize
     img = cv2.resize(img, (w_, h_))
     img = img.astype(np.float32).transpose(2,0,1)
-    if minc:
+    if ch == 23:
         img[0,:,:] -= 104
         img[1,:,:] -= 117
         img[2,:,:] -= 124
@@ -69,19 +64,20 @@ def inference_on_whole_image(img, model):
 
     for i in range(nh-1):
         for j in range(nw-1):
-            img_patch = img[:,:,i*128:(i+2)*128, j*128:(j+2)*128]
+            img_patch = img[:,:,i*size//2:(i+2)*size//2, j*size//2:(j+2)*size//2]
             #add imshow rectangle on the image
-            pred = model(img_patch)
+            xnir, xdpt = torch.Tensor(0).cuda(), torch.Tensor(0).cuda()
+            pred = model(img_patch, xnir, xdpt)
             pred = softmax(pred)
-            if minc:
+            if ch == 23:
                 pred = pred.squeeze()
                 pred = pred.cpu().numpy().transpose(1,2,0)
             else:
                 pred = pred.unsqueeze(0)
                 pred = pred.cpu().numpy()
             #print(np.argmax(pred, axis=2))
-            pred = cv2.resize(pred, (256, 256))
-            prob[i*128:(i+2)*128, j*128:(j+2)*128, :] = pred
+            pred = cv2.resize(pred, (size, size))
+            prob[i*size//2:(i+2)*size//2, j*size//2:(j+2)*size//2, :] = pred
 
     return prob
 
@@ -128,13 +124,25 @@ class DenseCRF(object):
         return Q
 
 
-print()
-#2,6,10, 33
-i = int(sys.argv[1])
-ch = 15
+path, l = [], sys.path[0].split('/')
+for i in range(len(l)):
+    path.append(l[i])
+    if l[i] == 'Material_recognition':
+        break
+path = '/'.join(path) + '/'
 
-m = coatnet_full(0)
-m.load_state_dict(torch.load('../../weights/coatnet2_rgb_irh.pth'), strict=False)
+
+path_img = path + "datasets/irh/files/img_raw/rgb/"
+color_palette = np.loadtxt(path + "test/crf/palette.txt").astype(np.uint8)
+ch, size = 15, 384
+l = os.listdir(path_img)
+sorted(l)
+
+#2,6,10, 33
+
+m = coatnet_full(0, load=False)
+m.load_state_dict(torch.load(path + "weights/coatnet2_rgb_irh.pth"), strict=False)
+m = m.cuda()
 """
 m = resnet50()
 m.fc = nn.Linear(m.fc.in_features, ch)
@@ -145,12 +153,11 @@ m = googlenet()
 m.load_state_dict(torch.load('../../weights/minc-googlenet.pth'), strict=False)
 m.cuda().eval()
 """
-torch.set_grad_enabled(False)
-if ch ==23:
-    labels = open('categories.txt', 'r').readlines()
-else:
 
-    labels = open('categories_irh.txt', 'r').readlines()
+if ch == 23:
+    labels = open(path + "test/crf/categories.txt", 'r').readlines()
+else:
+    labels = open(path + "test/crf/categories_irh.txt", 'r').readlines()
 labels = [i.strip() for i in labels]
 
 postprocessor = DenseCRF(
@@ -161,37 +168,25 @@ postprocessor = DenseCRF(
     bi_rgb_std=3,
     bi_w=4,
 )
-print(l[i])
-img = cv2.imread(path + l[i])
+print(path + l[int(sys.argv[1])])
+img = cv2.imread(path_img + l[int(sys.argv[1])])
 img = cv2.resize(img, (1280, 720))
 
-prob0 = multi_scale_inference(img, m)
-#prob1 = multi_scale_inference(img, m1)
-prob = prob0 #(prob0 + prob1) / 2
-
-prob = cv2.resize(prob, (480, 320))
-img = cv2.resize(img, (480, 320))
-prob = prob.transpose(2,0,1)
+prob = cv2.resize(multi_scale_inference(img, m), (640, 360)).transpose(2,0,1)
+img = cv2.resize(img, (640, 360))
 
 prob = postprocessor(img, prob)
 labelmap = np.argmax(prob, axis=0)
 
-
-
 mask = color_image_w_masks(img, labelmap)
-
-cv2.imwrite("minc_inf.png", cv2.resize(mask, (1280, 720)))
-
 img = np.concatenate([img, mask], axis=1)
-#cv2.imshow('img', img)
-#cv2.waitKey()
 
-#'''
+cv2.imwrite("crf_" + l[int(sys.argv[1])], cv2.resize(mask, (1280, 720)))
+
 plt.figure(figsize=(10, 10))
 plt.imshow(img[:, :, ::-1])
 
 plt.figure(figsize=(15, 15))
-
 for i in range(ch):
     mask = labelmap == i
     ax = plt.subplot(4, 6, i + 1)
@@ -199,6 +194,5 @@ for i in range(ch):
     ax.imshow(img[:, :, ::-1])
     ax.imshow(mask.astype(np.float32), alpha=0.5)
     ax.axis("off")
-
 plt.tight_layout()
 plt.show()
