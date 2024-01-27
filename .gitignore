@@ -1,5 +1,5 @@
 minc-model.tar.gz
-datasets/irh/files/*
+datasets/*
 !datasets/.gitkeep
 weights/*
 !weights/.gitkeep
