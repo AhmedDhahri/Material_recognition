@@ -64,12 +64,18 @@ class Combined_Loss:
 
 class Metrics:
     def __init__(self, gpu=0, m2irh=False):
-        self.dict_minc_2_irh = {1:11, 2:2, 3:1, 4:2, 5:7, 6:7,
-                                7:3, 8:7, 9:4, 10:5, 11:6, 12:7,
-                                13:8, 14:9, 15:10, 16:1, 17:7,
-                                18:7, 19:11, 20:7, 21:9, 22:7, 23:12}
+        self.minc_irh = {1: 1, 3: 2, 16: 2, 2: 3, 4: 3, 7: 4, 9: 5, 10: 6, 11: 7, 5: 8, 6: 8, 8: 8, 12: 8, 17: 8, 18: 8, 22: 8, 13: 9, 14: 10, 21: 10, 15: 11, 19: 12, 20: 13, 23: 14}
+        self.irh_minc = {1:[1], 2:[3, 16], 3:[2, 4], 4:[7], 5:[9], 6:[10], 7:[11], 8:[5, 6, 8, 12, 17, 18, 22], 9:[13], 10:[14, 21], 11:[15],  12:[19], 13:[20], 14:[23], 15:[]}
         self.m2irh = m2irh
         self.gpu = gpu
+
+    def accuracy_irh(self, y_pred, y):
+        y_pred = torch.argmax(y_pred, 1).detach().cpu()
+        for i in range(y_pred.shape[0]):
+            y_pred[i] = self.minc_irh[y_pred[i].item()]
+            y[i] = self.minc_irh[y[i].item()]
+        
+        return 100 * torch.sum(y == y_pred)/y_pred.shape[0]
 
     def accuracy(self, y_pred, y):
         y_pred = torch.argmax(y_pred, 1).detach().cpu()
