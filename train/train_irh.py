@@ -16,7 +16,7 @@ from models.coatnet2_multimodal import coatnet_full
 TRAIN_ITER = 500
 BATCH_SIZE, EPOCHS, EXPERIMENT, LOAD = int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), True
 #model, _, log_file, SIZE, BATCH_SIZE = model_params(model_name=sys.argv[1], load=LOAD).get() #"swinv2b", "vith14", "eva02l14", "maxvitxl", coatnet2
-SIZE, LR  = 384, 4e-5
+SIZE, LR  = 384, 5e-6
 model = coatnet_full(EXPERIMENT)
 model = model.eval()
 model = model.cuda()
@@ -34,8 +34,8 @@ else:
 
 checkpoint, log_file = 'Material_recognition/weights/' + net_name + '.pth', open('Material_recognition/logs/' + net_name + '.log', "a")
 train_dataset = IRHDataset("Material_recognition/datasets/irh/files/img_raw", "Material_recognition/datasets/irh/dataset.csv", (SIZE, SIZE), EXPERIMENT)
-train_loader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, num_workers=24, pin_memory=True, shuffle=True)
-test_loader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, num_workers=24, pin_memory=True, shuffle=True)
+train_loader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, num_workers=BATCH_SIZE, pin_memory=True, shuffle=True)
+test_loader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, num_workers=BATCH_SIZE, pin_memory=True, shuffle=True)
 
 optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=1e-8)
 lr_scheduler = CosineDecayLR(optimizer, LR, len(train_loader) * EPOCHS)
