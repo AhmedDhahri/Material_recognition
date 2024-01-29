@@ -69,13 +69,19 @@ class Metrics:
         self.m2irh = m2irh
         self.gpu = gpu
 
-    def accuracy_irh(self, y_pred, y):
+    def accuracy_irh(self, y_pred, y, irh=False):
         y_pred = torch.argmax(y_pred, 1).detach().cpu()
         for i in range(y_pred.shape[0]):
-            y_pred[i] = self.minc_irh[y_pred[i].item()]
-            y[i] = self.minc_irh[y[i].item()]
+            key_pred, key = y_pred[i].item()+1, y[i].item()+1
+            
+            if irh:
+                y_pred[i] = key_pred
+            else:
+                y_pred[i] = self.minc_irh[key_pred]
+            y[i] = self.minc_irh[key]
+
         
-        return 100 * torch.sum(y == y_pred)/y_pred.shape[0]
+        return torch.sum(y == y_pred)/y_pred.shape[0]
 
     def accuracy(self, y_pred, y):
         y_pred = torch.argmax(y_pred, 1).detach().cpu()

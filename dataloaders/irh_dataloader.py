@@ -8,12 +8,34 @@ import random
 from torchvision import transforms as v2
 
 class IRHDataset(Dataset):
-    def __init__(self, dir, labels, size, experiment=0):
+    def __init__(self, dir, labels, size, experiment=0, cls=-1):
         self.dir = dir
         self.size = size
         self.data = np.genfromtxt(labels, delimiter=',')[1:]
-        self.experiment = experiment
 
+        self.new_data = {}
+        for i in range(self.data.shape[0]):
+            y = int(self.data[i, 3]) + 1
+            if y not in self.new_data.keys():
+                self.new_data[y] = []
+            else:
+                self.new_data[y].append(self.data[i])
+
+
+        print("Dataset size is {}. Class is {}".format(self.data.shape[0], cls))
+        data_ = []
+        for i in range(self.data.shape[0]):
+            _, _, _, m = self.data[i]
+            if int(m + 1) != cls and cls != -1:
+                continue
+            data_.append(self.data[i])
+        self.data = np.array(data_)
+        print("Dataset size after dropping classes is {}".format(self.data.shape[0]))
+
+
+
+
+        self.experiment = experiment
         self.transforms = v2.Compose([
             v2.RandomHorizontalFlip(p=0.5),
             v2.RandomVerticalFlip(p=0.2),

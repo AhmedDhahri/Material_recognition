@@ -139,9 +139,13 @@ l = os.listdir(path_img)
 sorted(l)
 
 #2,6,10, 33
+m = coatnet_full(0, load=False) if ch == 15 else googlenet()
 
-m = coatnet_full(0, load=False)
-m.load_state_dict(torch.load(path + "weights/coatnet2_rgb_irh.pth"), strict=False)
+if ch == 15:
+    m.load_state_dict(torch.load(path + "weights/coatnet2_rgb_irh.pth"), strict=False)
+else:
+    m.load_state_dict(torch.load('../../weights/minc-googlenet.pth'), strict=False)
+m = m.eval()
 m = m.cuda()
 """
 m = resnet50()
@@ -149,9 +153,6 @@ m.fc = nn.Linear(m.fc.in_features, ch)
 m.load_state_dict(torch.load('../../weights/resnet50_minc.pth'), strict=False)
 m.cuda().eval()
 
-m = googlenet()
-m.load_state_dict(torch.load('../../weights/minc-googlenet.pth'), strict=False)
-m.cuda().eval()
 """
 
 if ch == 23:

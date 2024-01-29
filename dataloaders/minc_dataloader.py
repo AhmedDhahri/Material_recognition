@@ -11,49 +11,50 @@ import math
 from PIL import Image
 
 class MINCDataset(Dataset):
-    def __init__(self, dir, labels, size=(256, 256), f=0.16, cls=[5, 6, 8, 17, 18, 21, 22]):
+    def __init__(self, dir, labels, size=(256, 256), f=0.16, drop_cls=[5, 6, 8, 17, 18, 21, 22], cls=-1):
+        if cls in drop_cls:
+            print("Class {} is droped.".format(cls))
+        else:
+            print("Class {} is kept.".format(cls))
+        
         self.dir = dir
         self.data = np.genfromtxt(labels, delimiter=',')
-        self.drop_classes(cls)
         self.size = size
         self.f = f
-        self.labels_id = []
+
+        print("Dataset size is {}".format(self.data.shape[0]), end='. ')
+        data_ = []
         for i in range(self.data.shape[0]):
-            c, img, x, y = self.data[i]
+            m, _, x, y = self.data[i]
+            if int(m + 1) != cls and cls != -1:
+                continue
+            if int(m + 1) in drop_cls:
+                continue
             if x < f or y < f or (1-x) < f or (1-y) < f:
-                pass
-            else:
-                self.labels_id.append(i)
+                continue
+            data_.append(self.data[i])
+        self.data = np.array(data_)
+        print("After dropping classes size is {}".format(self.data.shape[0]))
 
         #consider data equilibribium
-                
-    def drop_classes(self, cls):
-        print("Dataset size is {}".format(self.data.shape[0]))
-        i = 0
-        while i < self.data.shape[0]:
-            if int(self.data[i,0]+1) in cls:
-                self.data = np.delete(self.data, i, 0)
-            else:
-                i += 1
-        print("Dataset size after dropping {} classes is {}".format(cls, self.data.shape[0]))
+        
 
     def __len__(self):
-        return len(self.labels_id)
+        return self.data.shape[0]
 
-    def __getitem__(self, i):
+    def __getitem__(self, index):
         #11,000105677,0.18545454545454546,0.7845454545454545
-        index = self.labels_id[i]
 
-        Y = int(self.data[index][0])
-        file_id = int(self.data[index][1])
+        Y = int(self.data[index, 0])
+        file_id = int(self.data[index, 1])
         sub_folder = str(file_id % 10)
         file_path = self.dir + '/' + sub_folder + '/' + "%09d" % file_id + ".jpg"
         img_ = cv2.imread(file_path)
 
 
         min_shape_div2 = int(min(img_.shape[:2]) * self.f)
-        c_x = int(self.data[index][2] * img_.shape[1])
-        c_y = int(self.data[index][3] * img_.shape[0])#maybe swap 2 and 3
+        c_x = int(self.data[index, 2] * img_.shape[1])
+        c_y = int(self.data[index, 3] * img_.shape[0])#maybe swap 2 and 3
 
         X = img_[c_y - min_shape_div2  : c_y + min_shape_div2,
                  c_x - min_shape_div2  : c_x + min_shape_div2,
