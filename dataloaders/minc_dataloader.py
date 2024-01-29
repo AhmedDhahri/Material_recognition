@@ -11,9 +11,10 @@ import math
 from PIL import Image
 
 class MINCDataset(Dataset):
-    def __init__(self, dir, labels, size=(256, 256), f=0.16):
+    def __init__(self, dir, labels, size=(256, 256), f=0.16, cls=[5, 6, 8, 17, 18, 21, 22]):
         self.dir = dir
         self.data = np.genfromtxt(labels, delimiter=',')
+        self.drop_classes(cls)
         self.size = size
         self.f = f
         self.labels_id = []
@@ -25,6 +26,17 @@ class MINCDataset(Dataset):
                 self.labels_id.append(i)
 
         #consider data equilibribium
+                
+    def drop_classes(self, cls):
+        print("Dataset size is {}".format(self.data.shape[0]))
+        i = 0
+        while i < self.data.shape[0]:
+            if int(self.data[i,0]+1) in cls:
+                self.data = np.delete(self.data, i, 0)
+            else:
+                i += 1
+        print("Dataset size after dropping {} classes is {}".format(cls, self.data.shape[0]))
+
     def __len__(self):
         return len(self.labels_id)
 
