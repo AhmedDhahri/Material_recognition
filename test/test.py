@@ -13,8 +13,7 @@ from dataloaders.irh_dataloader import IRHDataset
 from utils import Metrics
 from models.coatnet2_multimodal import coatnet_full
 
-irh, minc = True, False
-CLS, EXPERIEMT = int(sys.argv[1]), int(sys.argv[2])
+CLS, EXPERIEMT = int(sys.argv[1]), int(sys.argv[2])# irh 0,1,2; minc 3
 
 SIZE, BATCH_SIZE, NUM_WORKERS, model, dataloader = 384, 8, 8, 0, 0
 
@@ -25,7 +24,7 @@ minc_checkpoint = "Material_recognition/weights/coatnet2_minc.pth"
 irh_path = "Material_recognition/datasets/irh/files/img_raw"
 irh_labels = "Material_recognition/datasets/irh/dataset.csv"
 irh_checkpoint = ""
-if EXPERIEMT == 0:
+if EXPERIEMT == 0 or EXPERIEMT == 4:
     irh_checkpoint = "Material_recognition/weights/coatnet2_rgb_irh.pth"
 elif EXPERIEMT == 1:
     irh_checkpoint = "Material_recognition/weights/coatnet2_rgb_nir_irh.pth"
@@ -36,25 +35,26 @@ elif EXPERIEMT == 2:
 #model, _, _, SIZE, BATCH_SIZE = model_params(model_name=MODEL_NAME, load=True).get()
 
 
-
-if irh:
+if EXPERIEMT in [0,1,2]:
     model = coatnet_full(EXPERIEMT, load=False).cuda()
     model.load_state_dict(torch.load(irh_checkpoint), strict=False)
-else:
-    model = timm.create_model('coatnet_rmlp_2_rw_384.sw_in12k_ft_in1k', pretrained=False)
-    model.load_state_dict(torch.load(minc_checkpoint), strict=False)
-model = model.eval()
-model = model.cuda()
-
-if minc:
+    dataloader = DataLoader(IRHDataset(irh_path, irh_labels, (SIZE, SIZE), experiment=EXPERIEMT, cls=CLS), 
+            batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, pin_memory=True, shuffle=True)
+elif EXPERIEMT == 3:
     dataloader = DataLoader(dataset=MINCDataset(minc_path, minc_labels_t, size=(SIZE, SIZE), cls=CLS), 
             batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, pin_memory=True, shuffle=True)
-else:
+    model = timm.create_model('coatnet_rmlp_2_rw_384.sw_in12k_ft_in1k', pretrained=False)
+    model.load_state_dict(torch.load(minc_checkpoint), strict=False)
+elif EXPERIEMT == 4:
+    model = coatnet_full(0, load=False).cuda()
+    model.load_state_dict(torch.load(irh_checkpoint), strict=False)
     dataloader = DataLoader(IRHDataset(irh_path, irh_labels, (SIZE, SIZE), experiment=EXPERIEMT, cls=CLS), 
             batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, pin_memory=True, shuffle=True)
 
 
 
+model = model.eval()
+model = model.cuda()
 
 
 #devide data ipynb test and train.
@@ -77,13 +77,29 @@ with torch.no_grad():
         ac1, ac5, i = 0, 0, 0
         try:
             for idx, (X, Y) in r:
-                x_rgb, x_nir, x_dpt, y_pred = X, torch.Tensor(0), torch.Tensor(0), 0
-                if irh:
+                x_rgb, x_nir, x_dpt, y_pred, l = 0,0,0,0,0
+                if EXPERIEMT == 0:
+                    x_rgb, x_nir, x_dpt = X, torch.Tensor(0), torch.Tensor(0)
                     y_pred = model(x_rgb.cuda(), x_nir.cuda(), x_dpt.cuda())
-                else:
-                    y_pred = model(x_rgb.cuda())
+                    l = (loss.accuracy(y_pred, Y, False), 0.99)
+                elif EXPERIEMT == 1:
+                    x_rgb, x_nir, x_dpt = X, torch.Tensor(0)
+                    y_pred = model(x_rgb.cuda(), x_nir.cuda(), x_dpt.cuda())
+                    l = (loss.accuracy(y_pred, Y, False), 0.99)
+                elif EXPERIEMT == 2:
+                    x_rgb, x_nir, x_dpt = X
+                    y_pred = model(x_rgb.cuda(), x_nir.cuda(), x_dpt.cuda())
+                    l = (loss.accuracy(y_pred, Y, False), 0.99)
+                elif EXPERIEMT == 3:
+                    y_pred = model(X.cuda())
+                    l = (loss.accuracy_irh(y_pred, Y, False), 0.99)
+                elif EXPERIEMT == 4:
+                    x_rgb, x_nir, x_dpt = X, torch.Tensor(0), torch.Tensor(0)
+                    y_pred = model(x_rgb.cuda(), x_nir.cuda(), x_dpt.cuda())
+                    l = (loss.accuracy_irh(y_pred, Y, True), 0.99)
+                    
                 #l = loss.accuracies(y_pred, Y)
-                l = (loss.accuracy(y_pred, Y, irh), 0.99)
+                
 
                 ac1 += l[0]
                 ac5 += l[1]
