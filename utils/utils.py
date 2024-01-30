@@ -93,7 +93,7 @@ class Metrics:
         y_pred = torch.argsort(y_pred, dim=1, descending=True)[:, :5].detach().cpu()
         y = torch.argmax(y, 0)
         for i in range(y_pred.shape[0]):
-            if y[i] == y_pred[i, 0]:
+            if y[i] == y_pred[i]:
                 true_pred_1 +=1
                 true_pred_5 +=1
             elif y[i] in y_pred[i]:
