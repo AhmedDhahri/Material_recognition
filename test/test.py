@@ -83,7 +83,7 @@ with torch.no_grad():
                     y_pred = model(x_rgb.cuda(), x_nir.cuda(), x_dpt.cuda())
                     l = (loss.accuracy(y_pred, Y), 0.99)
                 elif EXPERIEMT == 1:
-                    x_rgb, x_nir, x_dpt = X, torch.Tensor(0)
+                    (x_rgb, x_nir), x_dpt = X, torch.Tensor(0)
                     y_pred = model(x_rgb.cuda(), x_nir.cuda(), x_dpt.cuda())
                     l = (loss.accuracy(y_pred, Y), 0.99)
                 elif EXPERIEMT == 2:

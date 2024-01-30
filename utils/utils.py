@@ -85,7 +85,7 @@ class Metrics:
 
     def accuracy(self, y_pred, y):
         y_pred = torch.argmax(y_pred, 1).detach().cpu()
-        return 100 * torch.sum(y == y_pred)/y_pred.shape[0]
+        return torch.sum(y == y_pred)/y_pred.shape[0]
 
     def accuracies(self, y_pred, y):
         true_pred_5 = 0
