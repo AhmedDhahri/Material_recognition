@@ -82,8 +82,8 @@ with torch.no_grad():
                     y_pred = model(x_rgb.cuda(), x_nir.cuda(), x_dpt.cuda())
                 else:
                     y_pred = model(x_rgb.cuda())
-                l = loss.accuracies(y_pred, Y)
-                #l = (loss.accuracy_irh(y_pred, Y, irh), 0.99)
+                #l = loss.accuracies(y_pred, Y)
+                l = (loss.accuracy(y_pred, Y, irh), 0.99)
 
                 ac1 += l[0]
                 ac5 += l[1]
