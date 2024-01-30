@@ -38,7 +38,7 @@ elif EXPERIEMT == 2:
 
 
 if irh:
-    model = coatnet_full(0, load=False).cuda()
+    model = coatnet_full(EXPERIEMT, load=False).cuda()
     model.load_state_dict(torch.load(irh_checkpoint), strict=False)
 else:
     model = timm.create_model('coatnet_rmlp_2_rw_384.sw_in12k_ft_in1k', pretrained=False)
