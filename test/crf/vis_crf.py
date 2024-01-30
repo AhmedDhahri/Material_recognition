@@ -35,7 +35,7 @@ def color_image_w_masks(image, masks):
     return image
 
 def inference_on_whole_image(img, model):
-    h,w,c = img.shape
+    h,w,c = img[0].shape
     if h % size != 0:
         h_ = (h // size + 1) * size
     else:
@@ -48,26 +48,29 @@ def inference_on_whole_image(img, model):
     nw = w_ // (size//2)
 
     #load tensor and resize
-    img = cv2.resize(img, (w_, h_))
-    img = img.astype(np.float32).transpose(2,0,1)
-    if ch == 23:
-        img[0,:,:] -= 104
-        img[1,:,:] -= 117
-        img[2,:,:] -= 124
-        img = torch.FloatTensor(img).unsqueeze(0).cuda()
-    else:
-        img = torch.FloatTensor(img/255).unsqueeze(0).cuda()
+    for i in range(len(img)):
+        img[i] = cv2.resize(img[i], (w_, h_))
+        img[i] = img[i].astype(np.float32).transpose(2,0,1)
+        img[i] = torch.FloatTensor(img[i]/255).unsqueeze(0).cuda()
+
+
     softmax = nn.Softmax(dim=1)
-
-
     prob = np.zeros((h_, w_, ch))
+
+    if EXPERIEMT == 0:
+        rgb = img[0]
+    elif EXPERIEMT == 1:
+        rgb, nir = img
+    elif EXPERIEMT == 2:
+        rgb, nir, dpt = img
 
     for i in range(nh-1):
         for j in range(nw-1):
-            img_patch = img[:,:,i*size//2:(i+2)*size//2, j*size//2:(j+2)*size//2]
+            rgb_patch = rgb[:,:,i*size//2:(i+2)*size//2, j*size//2:(j+2)*size//2]
+            nir_patch = nir[:,:,i*size//2:(i+2)*size//2, j*size//2:(j+2)*size//2] if EXPERIEMT > 0 else torch.FloatTensor(0)
+            dpt_patch = dpt[:,:,i*size//2:(i+2)*size//2, j*size//2:(j+2)*size//2] if EXPERIEMT > 1 else torch.FloatTensor(0)
             #add imshow rectangle on the image
-            xnir, xdpt = torch.Tensor(0).cuda(), torch.Tensor(0).cuda()
-            pred = model(img_patch, xnir, xdpt)
+            pred = model(rgb_patch, nir_patch, dpt_patch)
             pred = softmax(pred)
             if ch == 23:
                 pred = pred.squeeze()
@@ -82,13 +85,17 @@ def inference_on_whole_image(img, model):
     return prob
 
 def multi_scale_inference(img, model):
-    h,w,c = img.shape
+    h,w,_ = img[0].shape
     scales = [.5, 1, 1.5]
     prob = np.zeros((h,w,ch))
 
     for scale in scales:
-        img_ = cv2.resize(img, (int(w*scale), int(h*scale)))
+
+        img_ = []
+        for i in range(len(img)):
+            img_.append(cv2.resize(img[i], (int(w*scale), int(h*scale))))
         prob_ = inference_on_whole_image(img_, model)
+
         prob += cv2.resize(prob_, (w,h))
 
     prob /= 3
@@ -123,43 +130,34 @@ class DenseCRF(object):
 
         return Q
 
+def get_path():
+    path, l = [], sys.path[0].split('/')
+    for i in range(len(l)):
+        path.append(l[i])
+        if l[i] == 'Material_recognition':
+            break
+    return'/'.join(path) + '/'
 
-path, l = [], sys.path[0].split('/')
-for i in range(len(l)):
-    path.append(l[i])
-    if l[i] == 'Material_recognition':
-        break
-path = '/'.join(path) + '/'
-
-
-path_img = path + "datasets/irh/files/img_raw/rgb/"
+img_id, EXPERIEMT, ch, size = int(sys.argv[2]), int(sys.argv[1]), 15, 384
+path = get_path()
+path_rgb = path + "datasets/irh/files/img_raw/rgb/"
 color_palette = np.loadtxt(path + "test/crf/palette.txt").astype(np.uint8)
-ch, size = 15, 384
-l = os.listdir(path_img)
+l = os.listdir(path_rgb)
 sorted(l)
 
 #2,6,10, 33
-m = coatnet_full(0, load=False) if ch == 15 else googlenet()
+m = coatnet_full(EXPERIEMT, load=False)
+if EXPERIEMT == 0:
+    irh_checkpoint = "weights/coatnet2_rgb_irh.pth"
+elif EXPERIEMT == 1:
+    irh_checkpoint = "weights/coatnet2_rgb_nir_irh.pth"
+elif EXPERIEMT == 2:
+    irh_checkpoint = "weights/coatnet2_full_irh.pth"
+m.load_state_dict(torch.load(path + irh_checkpoint), strict=False)
 
-if ch == 15:
-    m.load_state_dict(torch.load(path + "weights/coatnet2_rgb_irh.pth"), strict=False)
-else:
-    m.load_state_dict(torch.load('../../weights/minc-googlenet.pth'), strict=False)
 m = m.eval()
 m = m.cuda()
-"""
-m = resnet50()
-m.fc = nn.Linear(m.fc.in_features, ch)
-m.load_state_dict(torch.load('../../weights/resnet50_minc.pth'), strict=False)
-m.cuda().eval()
-
-"""
-
-if ch == 23:
-    labels = open(path + "test/crf/categories.txt", 'r').readlines()
-else:
-    labels = open(path + "test/crf/categories_irh.txt", 'r').readlines()
-labels = [i.strip() for i in labels]
+labels = [i.strip() for i in open(path + "test/crf/categories_irh.txt", 'r').readlines()]
 
 postprocessor = DenseCRF(
     iter_max=10,
@@ -169,20 +167,25 @@ postprocessor = DenseCRF(
     bi_rgb_std=3,
     bi_w=4,
 )
-print(path + l[int(sys.argv[1])])
-img = cv2.imread(path_img + l[int(sys.argv[1])])
-img = cv2.resize(img, (1280, 720))
+
+id = l[img_id].split('_')[0]
+rgb = cv2.resize(cv2.imread(path_rgb + l[img_id]), (1280, 720))
+nir = cv2.resize(cv2.imread(path_rgb + "../nir/{}_nir.png".format(id)), (1280, 720))
+dpt = cv2.resize(cv2.imread(path_rgb + "../dpt/{}_dpt.png".format(id)) , (1280, 720))
+img = [rgb, nir, dpt]
 
 prob = cv2.resize(multi_scale_inference(img, m), (640, 360)).transpose(2,0,1)
-img = cv2.resize(img, (640, 360))
 
+
+
+img = cv2.resize(img[0], (640, 360))
 prob = postprocessor(img, prob)
 labelmap = np.argmax(prob, axis=0)
 
 mask = color_image_w_masks(img, labelmap)
 img = np.concatenate([img, mask], axis=1)
 
-cv2.imwrite("crf_" + l[int(sys.argv[1])], cv2.resize(mask, (1280, 720)))
+cv2.imwrite("crf_" + l[img_id], cv2.resize(mask, (1280, 720)))
 
 plt.figure(figsize=(10, 10))
 plt.imshow(img[:, :, ::-1])
