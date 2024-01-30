@@ -48,7 +48,7 @@ elif EXPERIEMT == 3:
 elif EXPERIEMT == 4:
     model = coatnet_full(0, load=False).cuda()
     model.load_state_dict(torch.load(irh_checkpoint), strict=False)
-    dataloader = DataLoader(IRHDataset(irh_path, irh_labels, (SIZE, SIZE), experiment=EXPERIEMT, cls=CLS), 
+    dataloader = DataLoader(IRHDataset(irh_path, irh_labels, (SIZE, SIZE), experiment=0, cls=CLS), 
             batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, pin_memory=True, shuffle=True)
 
 
@@ -81,15 +81,15 @@ with torch.no_grad():
                 if EXPERIEMT == 0:
                     x_rgb, x_nir, x_dpt = X, torch.Tensor(0), torch.Tensor(0)
                     y_pred = model(x_rgb.cuda(), x_nir.cuda(), x_dpt.cuda())
-                    l = (loss.accuracy(y_pred, Y, False), 0.99)
+                    l = (loss.accuracy(y_pred, Y), 0.99)
                 elif EXPERIEMT == 1:
                     x_rgb, x_nir, x_dpt = X, torch.Tensor(0)
                     y_pred = model(x_rgb.cuda(), x_nir.cuda(), x_dpt.cuda())
-                    l = (loss.accuracy(y_pred, Y, False), 0.99)
+                    l = (loss.accuracy(y_pred, Y), 0.99)
                 elif EXPERIEMT == 2:
                     x_rgb, x_nir, x_dpt = X
                     y_pred = model(x_rgb.cuda(), x_nir.cuda(), x_dpt.cuda())
-                    l = (loss.accuracy(y_pred, Y, False), 0.99)
+                    l = (loss.accuracy(y_pred, Y), 0.99)
                 elif EXPERIEMT == 3:
                     y_pred = model(X.cuda())
                     l = (loss.accuracy_irh(y_pred, Y, False), 0.99)
