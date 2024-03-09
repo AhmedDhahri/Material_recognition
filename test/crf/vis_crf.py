@@ -28,7 +28,7 @@ def color_image_w_masks(image, masks):
         color = color_palette[index]
         mask = np.expand_dims(mask, axis=-1)
         mask = np.repeat(mask, 3, axis=-1)
-        cv2.imwrite("masks/cat_" + str(index) + ".png", cv2.resize(mask, (640, 480))*150)
+        cv2.imwrite("masks/cat_" + str(index) + ".png", cv2.resize(mask, (1280, 720))*150)
         mask = mask * np.array(color).reshape((-1, 3)) + (1 - mask) * image
         mask = mask.astype(np.uint8)
         image = cv2.addWeighted(image, .5, mask, .5, 0)
@@ -185,7 +185,8 @@ labelmap = np.argmax(prob, axis=0)
 mask = color_image_w_masks(img, labelmap)
 img = np.concatenate([img, mask], axis=1)
 
-cv2.imwrite("crf_" + l[img_id], cv2.resize(mask, (1280, 720)))
+print(l[img_id])
+cv2.imwrite(path + "../crf_{}_{}_{}.png".format(img_id,id, EXPERIEMT), cv2.resize(mask, (1280, 720)))
 
 plt.figure(figsize=(10, 10))
 plt.imshow(img[:, :, ::-1])
