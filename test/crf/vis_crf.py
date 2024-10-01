@@ -138,7 +138,7 @@ def get_path():
             break
     return'/'.join(path) + '/'
 
-img_id, EXPERIEMT, ch, size = int(sys.argv[2]), int(sys.argv[1]), 15, 384
+MODEL_NAME, img_id, EXPERIEMT, ch, size = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), 15, 384
 path = get_path()
 path_rgb = path + "datasets/irh/img_raw/rgb/"
 color_palette = np.loadtxt(path + "test/crf/palette.txt").astype(np.uint8)
