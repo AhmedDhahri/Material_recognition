@@ -14,7 +14,7 @@ from models.coatnet2_multimodal import coatnet_full
 
 
 TRAIN_ITER = 500
-BATCH_SIZE, EPOCHS, EXPERIMENT, LOAD = int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3]), True
+MODEL_NAME, BATCH_SIZE, EPOCHS, EXPERIMENT, LOAD = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]), True
 #model, _, log_file, SIZE, BATCH_SIZE = model_params(model_name=sys.argv[1], load=LOAD).get() #"swinv2b", "vith14", "eva02l14", "maxvitxl", coatnet2
 SIZE, LR  = 384, 3e-6
 model = coatnet_full(EXPERIMENT)
