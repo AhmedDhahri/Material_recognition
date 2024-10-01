@@ -121,3 +121,105 @@ class IRHDataset(Dataset):
             torch.set_rng_state(state)
             X_dpt = self.transforms(X_dpt)
             return (X_rgb, X_nir, X_dpt), Y
+
+
+class UIRHDataset(Dataset):
+    def __init__(self, dir, labels, size, experiment=0, cls=-1):
+        self.dir = dir
+        self.size = size
+        self.data = np.genfromtxt(labels, delimiter=',')[1:]
+
+        self.new_data = {}
+        for i in range(self.data.shape[0]):
+            y = int(self.data[i, 3]) + 1
+            if y not in self.new_data.keys():
+                self.new_data[y] = []
+            else:
+                self.new_data[y].append(self.data[i])
+
+
+        data_ = []
+        for i in range(self.data.shape[0]):
+            _, _, _, m = self.data[i]
+            if int(m + 1) != cls and cls != -1:
+                continue
+            data_.append(self.data[i])
+        self.data = np.array(data_)
+
+
+
+
+        self.experiment = experiment
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, index):
+        file_id = int(self.data[index][0])
+        rgb_path = self.dir + '/' + "rgb" + '/' + "%06d_" % file_id + "rgb" + ".png"
+        nir_path = self.dir + '/' + "nir" + '/' + "%06d_" % file_id + "nir" + ".png"
+        dpt_path = self.dir + '/' + "dpt" + '/' + "%06d_" % file_id + "dpt" + ".png"
+        
+        rgb = cv2.imread(rgb_path)
+        (a, c, std, clip) = (185, 200, 6.5, 12) if rgb.shape == (1280, 720, 3) else (295, 315, 6.5, 9)
+        a, c = int(max(min(random.normalvariate(mu=a, sigma=std), a+clip), a-clip)), int(max(min(random.normalvariate(mu=c, sigma=std), c+clip), c-clip))
+
+        x, y = int(float(self.data[index][1]) * 1280), int(float(self.data[index][2]) * 720)
+        resize, min_size = random.randrange(0, 50) + self.size[0]//2,  min(x,y, 1280-x, 720-y)
+        if resize > min_size:
+            resize = min_size
+        
+        if self.experiment == 0:
+            if rgb.shape == (480, 640, 3):
+                rgb = cv2.resize(rgb, (1280, 720))
+
+            X_rgb = rgb[y-resize:y+resize, x-resize:x+resize, :]/255.0
+            X_rgb = np.float32(cv2.resize(X_rgb, self.size))
+            X_rgb = torch.from_numpy(X_rgb).permute(2, 0, 1)
+            return X_rgb
+
+        if self.experiment == 1:
+            nir = cv2.imread(nir_path)
+            if rgb.shape == (480, 640, 3):
+                rgb = cv2.resize(rgb, (1280, 720))
+            nir = cv2.resize(nir[102:607, a:1280-c], (1280, 720))
+
+            X_rgb = rgb[y-resize:y+resize, x-resize:x+resize]/255.0
+            X_rgb = np.float32(cv2.resize(X_rgb, self.size))
+            X_rgb = torch.from_numpy(X_rgb).permute(2, 0, 1)
+            
+            X_nir = nir[y-resize:y+resize, x-resize:x+resize]/255.0
+            X_nir = np.float32(cv2.resize(X_nir, self.size))
+            X_nir = torch.from_numpy(X_nir).permute(2, 0, 1)
+
+            X_rgb = self.blur_transform(X_rgb)            
+            state = torch.get_rng_state()
+            torch.set_rng_state(state)
+            return (X_rgb, X_nir)
+
+        if self.experiment == 2:
+            nir, dpt = cv2.imread(nir_path), cv2.imread(dpt_path)
+            if rgb.shape == (480, 640, 3):
+                rgb = cv2.resize(rgb, (1280, 720))
+                dpt = cv2.resize(dpt, (1280, 720))
+            nir = cv2.resize(nir[102:607, a:1280-c], (1280, 720))
+
+            X_rgb = rgb[y-resize:y+resize, x-resize:x+resize]/255.0
+            X_rgb = np.float32(cv2.resize(X_rgb, self.size))
+            X_rgb = torch.from_numpy(X_rgb).permute(2, 0, 1)
+            
+            X_nir = nir[y-resize:y+resize, x-resize:x+resize]/255.0
+            X_nir = np.float32(cv2.resize(X_nir, self.size))
+            X_nir = torch.from_numpy(X_nir).permute(2, 0, 1)
+
+            X_dpt = dpt[y-resize:y+resize, x-resize:x+resize]/255.0
+            X_dpt = np.float32(cv2.resize(X_dpt, self.size))
+            X_dpt = torch.from_numpy(X_dpt).permute(2, 0, 1)
+
+            X_rgb = self.blur_transform(X_rgb)
+            
+            state = torch.get_rng_state()
+            torch.set_rng_state(state)
+            torch.set_rng_state(state)
+            return (X_rgb, X_nir, X_dpt)
+
