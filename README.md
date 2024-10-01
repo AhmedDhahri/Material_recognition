@@ -4,7 +4,7 @@
 
 **Possible MODEL_NAME are: swinv2b, vith14, eva02l14, maxvitxl, coatnet2. moat4**
 
-**Possible EXPERIMENT values are 0 for RGB training, 1 for RGB-NIR training and 2 for DEPTH training.**
+**Possible EXPERIMENT values are 0 for RGB training, 1 for RGB-NIR training and 2 for DEPTH training. Also, only coatnet2 provides multiple backbones. Thus, EXPERIMENT is useless with other backbones.**
 
 #### 1- Download datasets:
 Using a shell script *get_datasets.sh* allows to download datasets (IRH, MINC, SUN, EPFL), automatically, and place each one in its adequate directory. Use this commmand line to run the script.
