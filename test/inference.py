@@ -13,7 +13,7 @@ from model_params import model_params
 
 
 #Arguments and init
-MODEL_NAME, EXPERIMEMT, FILE,  = sys.argv[1], int(sys.argv[2]), sys.argv[3:]
+MODEL_NAME, EXPERIMEMT, FILE  = sys.argv[1], int(sys.argv[2]), sys.argv[3:]
 rgb, nir, dpt, SIZE, model, checkpoint = torch.Tensor(0).cuda(), torch.Tensor(0).cuda(), torch.Tensor(0).cuda(), None, None, None
 
 
