@@ -13,7 +13,7 @@ from dataloaders.irh_dataloader import IRHDataset
 from utils import Metrics
 from models.coatnet2_multimodal import coatnet_full
 
-CLS, EXPERIEMT = int(sys.argv[1]), int(sys.argv[2])# irh 0,1,2; minc 3
+MODEL_NAME, CLS, EXPERIEMT = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])# irh 0,1,2; minc 3
 
 SIZE, BATCH_SIZE, NUM_WORKERS, model, dataloader = 384, 8, 8, 0, 0
 
