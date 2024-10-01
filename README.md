@@ -1,7 +1,9 @@
 # Material_recognition
 
 **All scripts must be executed from outside the main directory**
+
 **Possible MODEL_NAME are: swinv2b, vith14, eva02l14, maxvitxl, coatnet2. moat4**
+
 **Possible EXPERIMENT values are 0 for RGB training, 1 for RGB-NIR training and 2 for DEPTH training.**
 
 #### 1- Download datasets:
