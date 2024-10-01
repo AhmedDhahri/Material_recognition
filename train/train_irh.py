@@ -35,7 +35,7 @@ else:
     exit(0)
 
 checkpoint, log_file = 'Material_recognition/weights/' + net_name + '.pth', open('Material_recognition/logs/' + net_name + '.log', "a")
-train_dataset = IRHDataset("Material_recognition/datasets/irh/files/img_raw", "Material_recognition/datasets/irh/dataset.csv", (SIZE, SIZE), EXPERIMENT)
+train_dataset = IRHDataset("Material_recognition/datasets/irh/img_raw", "Material_recognition/datasets/irh/dataset.csv", (SIZE, SIZE), EXPERIMENT)
 train_loader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, num_workers=BATCH_SIZE, pin_memory=True, shuffle=True)
 test_loader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, num_workers=BATCH_SIZE, pin_memory=True, shuffle=True)
 

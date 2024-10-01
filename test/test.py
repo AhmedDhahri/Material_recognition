@@ -21,7 +21,7 @@ minc_path = 'Material_recognition/datasets/minc'
 minc_labels_t = 'Material_recognition/datasets/minc/test.txt'
 minc_checkpoint = "Material_recognition/weights/coatnet2_minc.pth"
 
-irh_path = "Material_recognition/datasets/irh/files/img_raw"
+irh_path = "Material_recognition/datasets/irh/img_raw"
 irh_labels = "Material_recognition/datasets/irh/dataset.csv"
 irh_checkpoint = ""
 if EXPERIEMT == 0 or EXPERIEMT == 4:

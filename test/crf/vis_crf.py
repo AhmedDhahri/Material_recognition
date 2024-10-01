@@ -140,7 +140,7 @@ def get_path():
 
 img_id, EXPERIEMT, ch, size = int(sys.argv[2]), int(sys.argv[1]), 15, 384
 path = get_path()
-path_rgb = path + "datasets/irh/files/img_raw/rgb/"
+path_rgb = path + "datasets/irh/img_raw/rgb/"
 color_palette = np.loadtxt(path + "test/crf/palette.txt").astype(np.uint8)
 l = os.listdir(path_rgb)
 sorted(l)

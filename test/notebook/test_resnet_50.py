@@ -18,7 +18,7 @@ from torchvision.models import resnet50
 minc_path = '/home/ahmed/workspace/notebook/matrec/datasets/minc'
 labels_path_t = '/home/ahmed/workspace/notebook/matrec/datasets/minc/test.txt'
 
-irh_path = "../datasets/irh/files/img_raw"
+irh_path = "../datasets/irh/img_raw"
 label_irh = "../datasets/irh/files/dataset.csv"
 BATCH_SIZE = 4
 size = 256
