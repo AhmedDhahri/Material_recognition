@@ -39,3 +39,18 @@ else
 	unzip Irh_dataset.zip -d ../datasets/irh/files
 fi
 
+if test -f "nirscene1.zip"; then
+	echo "nirscene1.zip exist."
+else
+	wget http://ivrlwww.epfl.ch/supplementary_material/cvpr11/nirscene1.zip
+	unzip nirscene1.zip -d ../datasets/
+fi
+
+
+if test -f "SUNRGBD.zip"; then
+	echo "SUNRGBD.zip exist."
+else
+	wget https://3dvision.princeton.edu/projects/2015/SUNrgbd/data/SUNRGBD.zip
+	unzip SUNRGBD.zip -d ../datasets/
+fi
+
