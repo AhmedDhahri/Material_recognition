@@ -22,6 +22,8 @@ model = model.eval()
 model = model.cuda()
 
 global net_name 
+
+#EXPERIMENT 0 for RGB, 1 for RGB-NIR and 2 for RGB-NIR-depth
 if EXPERIMENT == 0:
     net_name = 'coatnet2_rgb_irh' 
 elif EXPERIMENT == 1:

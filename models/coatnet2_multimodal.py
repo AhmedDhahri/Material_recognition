@@ -7,7 +7,7 @@ class classifier(nn.Module):
     def __init__(self):
         super().__init__()
         self.adapool = SelectAdaptivePool2d(pool_type='avg', flatten=nn.Flatten(start_dim=1, end_dim=-1))
-    def forward(self, x, pre_logits):
+    def forward(self, x):
         return self.adapool(x)
 
 class coatnet_full(nn.Module):

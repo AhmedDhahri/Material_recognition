@@ -17,7 +17,7 @@ module load cuda/11.4
 module load python/3.10
 module load opencv/4.7.0
 
-python3 Material_recognition/train/train_multi_thread.py swinv2b False
+python3 Material_recognition/train/train_minc.py swinv2b False
 
  
 
