@@ -40,7 +40,7 @@ print("Num workers:", NUM_WORKERS)
 
 with torch.no_grad():
         r = tqdm(enumerate(loader), leave=False, desc="Test: ", total=len(loader))
-        ac1, ac5, i = 0, 0, 0
+        ac, i = 0, 0
         try:
             for idx, (X, Y) in r:
                 if EXPERIMENT == 0:
@@ -49,17 +49,16 @@ with torch.no_grad():
                     (x_rgb, x_nir), x_dpt = X, torch.Tensor(0)
                 elif EXPERIMENT == 2:
                     x_rgb, x_nir, x_dpt = X
-                y_pred = model(x_rgb.cuda(), x_nir.cuda(), x_dpt.cuda())
-                l = loss.accuracies(y_pred.item(), Y)
-                ac1 += l[0]
-                ac5 += l[1]
-                r.set_postfix(loss=ac1/(idx+1))
+                Y_pred = model(x_rgb.cuda(), x_nir.cuda(), x_dpt.cuda())
+               
+                l = loss.accuracy_irh(Y_pred, Y)
+                ac += l
+                r.set_postfix(loss=ac/(idx+1))
                 i = idx + 1
 
-            ac1 /= i
-            ac5 /= i
-            print("Top 1 acccuracy ", ac1 * 100, "Top 5 error ", ac5 * 100)
+            ac /= i
+            print("Top 1 acccuracy ", ac * 100)
         except KeyboardInterrupt:
             ac1 /= i
             ac5 /= i
-            print("Top 1 acccuracy ", ac1 * 100, "Top 5 error ", ac5 * 100)
+            print("Top 1 acccuracy ", ac * 100)
